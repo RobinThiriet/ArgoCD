@@ -93,13 +93,12 @@ Ajoute ensuite dans `/etc/hosts`:
 ```bash
 make argocd-install
 make argocd-password
-make argocd-ui
 ```
 
 UI Argo CD:
 
 ```text
-https://localhost:8080
+http://argocd.local
 ```
 
 ### 4. Pousser la branche
@@ -164,7 +163,7 @@ Le but est:
 | `make hosts-print` | Affiche la ligne `/etc/hosts` a ajouter. |
 | `make argocd-install` | Installe Argo CD. |
 | `make argocd-password` | Recupere le mot de passe admin initial. |
-| `make argocd-ui` | Ouvre l'UI Argo CD. |
+| `make argocd-ui` | Ouvre l'UI Argo CD en port-forward de secours. |
 | `make gitops-bootstrap` | Cree l'application Guacamole dans Argo CD. |
 | `make guacamole-ui` | Ouvre Guacamole en port-forward. |
 | `make status` | Affiche l'etat du cluster. |

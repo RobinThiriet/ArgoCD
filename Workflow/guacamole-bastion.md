@@ -36,6 +36,7 @@ make hosts-print
 Puis ajouter dans `/etc/hosts`:
 
 ```text
+127.0.0.1 argocd.local
 127.0.0.1 guacamole.local
 ```
 
@@ -63,12 +64,15 @@ make gitops-bootstrap
 
 ```bash
 make status
-make argocd-ui
 ```
 
 Application Argo CD attendue:
 
 - `guacamole`
+
+Acces Argo CD:
+
+- `http://argocd.local`
 
 ## 6. Acceder a Guacamole
 

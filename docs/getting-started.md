@@ -28,6 +28,7 @@ make hosts-print
 Ajouter ensuite dans `/etc/hosts`:
 
 ```text
+127.0.0.1 argocd.local
 127.0.0.1 guacamole.local
 ```
 
@@ -36,6 +37,12 @@ Ajouter ensuite dans `/etc/hosts`:
 ```bash
 make argocd-install
 make argocd-password
+```
+
+Interface Argo CD:
+
+```text
+http://argocd.local
 ```
 
 ## Etape 4 - Pousser le repository

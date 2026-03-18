@@ -14,6 +14,12 @@ make status
 kubectl --context kind-argocd-lab -n argocd get pods
 ```
 
+### Ouvrir Argo CD sans port-forward
+
+```text
+http://argocd.local
+```
+
 ### Recuperer l'application Argo CD
 
 ```bash
