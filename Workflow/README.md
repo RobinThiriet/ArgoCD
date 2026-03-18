@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Ce document decrit le workflow normal d'utilisation d'Argo CD dans un projet GitOps, avec une logique simple, pratique et reproductible.
+Ce document decrit le workflow normal d'utilisation d'Argo CD dans cette branche, centree sur le bastion Guacamole.
 
 L'idee a retenir est la suivante:
 
@@ -39,8 +39,8 @@ Avant de modifier quoi que ce soit, il faut clarifier:
 Questions utiles:
 
 - est-ce un changement pour toutes les cibles ou seulement `dev`, `staging` ou `prod` ?
-- est-ce un changement de `Deployment`, `Service`, image, replicas, variables d'environnement ?
-- est-ce un changement sur `demo-app` ou `hello-app` ?
+- est-ce un changement de `Deployment`, `Service`, `Ingress`, stockage, image ou variables d'environnement ?
+- est-ce un changement Guacamole, `guacd` ou PostgreSQL ?
 
 ## 2. Choisir le bon endroit dans le repository
 
@@ -52,9 +52,9 @@ Regle simple:
 
 Exemples:
 
-- augmenter les replicas en `prod` pour `demo-app`: modifier `apps/demo-app/overlays/prod/`
-- changer l'image de `hello-app` partout: modifier `apps/hello-app/base/`
-- ajouter une nouvelle application: creer `apps/<app>/` et ses manifests Argo CD
+- changer l'hote `Ingress` de `prod`: modifier `apps/guacamole/overlays/prod/ingress-patch.yaml`
+- changer une variable commune a Guacamole: modifier `apps/guacamole/base/guacamole-deployment.yaml`
+- changer un mot de passe de lab: modifier `apps/guacamole/overlays/<env>/secret-patch.yaml`
 
 ## 3. Valider localement
 
@@ -77,7 +77,7 @@ Une fois le changement pret:
 ```bash
 git add .
 git commit -m "feat: describe the change"
-git push origin main
+git push origin feat/guacamole-bastion
 ```
 
 Dans une logique GitOps, tant que le changement n'est pas pousse, il n'existe pas pour Argo CD.
@@ -116,20 +116,18 @@ make status
 
 ## 7. Tester l'application
 
-Pour `demo-app`:
+Mode Ingress:
+
+- `http://guacamole.local`
+- `http://guacamole-staging.local`
+- `http://guacamole-prod.local`
+
+Mode port-forward:
 
 ```bash
-make demo-ui
-make demo-ui APP_ENV=staging
-make demo-ui APP_ENV=prod
-```
-
-Pour `hello-app`:
-
-```bash
-make app-ui APP_NAME=hello-app
-make app-ui APP_NAME=hello-app APP_ENV=staging
-make app-ui APP_NAME=hello-app APP_ENV=prod
+make guacamole-ui
+make guacamole-ui APP_ENV=staging
+make guacamole-ui APP_ENV=prod
 ```
 
 ## Workflow mental a adopter
@@ -165,22 +163,22 @@ Quand tu veux faire un changement, pense toujours dans cet ordre:
 
 Dans ce projet, le workflow habituel est:
 
-1. modifier une application dans `apps/`
+1. modifier Guacamole dans `apps/guacamole`
 2. lancer `make validate`
 3. commit et push
 4. laisser Argo CD synchroniser
 5. controler dans l'UI Argo CD
 6. verifier avec `make status`
-7. ouvrir l'application avec `make demo-ui` ou `make app-ui`
+7. tester via l'Ingress ou `make guacamole-ui`
 
 ## Cas d'usage typiques
 
-### Changer le nombre de replicas en `dev`
+### Changer un mot de passe de base de donnees en `dev`
 
 Exemple:
 
 ```text
-apps/demo-app/overlays/dev/deployment-patch.yaml
+apps/guacamole/overlays/dev/secret-patch.yaml
 ```
 
 Puis:
@@ -188,16 +186,16 @@ Puis:
 ```bash
 make validate
 git add .
-git commit -m "feat: scale demo app in dev"
-git push origin main
+git commit -m "feat: rotate guacamole dev database password"
+git push origin feat/guacamole-bastion
 ```
 
-## Changer l'image pour tous les environnements
+### Changer l'hote d'acces en `prod`
 
 Exemple:
 
 ```text
-apps/hello-app/base/deployment.yaml
+apps/guacamole/overlays/prod/ingress-patch.yaml
 ```
 
 Puis:
@@ -205,20 +203,9 @@ Puis:
 ```bash
 make validate
 git add .
-git commit -m "feat: update hello app image"
-git push origin main
+git commit -m "feat: update guacamole prod ingress host"
+git push origin feat/guacamole-bastion
 ```
-
-## Ajouter une nouvelle application
-
-Le workflow est:
-
-1. creer `apps/<nouvelle-app>/base`
-2. creer `apps/<nouvelle-app>/overlays/dev|staging|prod`
-3. creer les `Application` Argo CD dans `argocd/applications/`
-4. valider
-5. commit et push
-6. lancer si besoin `make gitops-bootstrap-all`
 
 ## Ce qu'il faut eviter
 

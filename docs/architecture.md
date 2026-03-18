@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Le projet implemente un laboratoire GitOps local. L'objectif n'est pas seulement d'installer Argo CD, mais de fournir un cadre lisible qui montre clairement:
+Le projet implemente un bastion Guacamole pilote en GitOps. L'objectif n'est pas seulement d'installer Argo CD, mais de fournir un cadre lisible qui montre clairement:
 
 - ou se trouve la source de verite;
 - comment Argo CD accede au repository;
@@ -16,8 +16,7 @@ flowchart LR
     Dev[Developpeur] -->|git push| GitHub[Repository GitHub]
     Dev -->|make / kubectl| Cluster[kind cluster]
     GitHub -->|repoURL| ArgoCD[Argo CD]
-    ArgoCD -->|sync| Demo[demo-app]
-    ArgoCD -->|sync| Hello[hello-app]
+    ArgoCD -->|sync| Guacamole[Guacamole bastion]
 ```
 
 ## Vue de deploiement
@@ -39,18 +38,16 @@ flowchart TB
             Redis[argocd-redis]
         end
 
-        subgraph NS2["Namespace demo"]
-            Deployment[Deployment demo-app dev]
-            Service[Service demo-app dev]
-            Pod[Pod whoami dev]
+        subgraph NS2["Namespace guacamole"]
+            Ingress[Ingress guacamole.local]
+            Web[Deployment guacamole]
+            Guacd[Deployment guacd]
+            Db[StatefulSet postgresql]
         end
 
-        subgraph NS3["Namespace demo-staging"]
-            DeploymentStaging[Deployment demo-app staging]
-        end
-
-        subgraph NS4["Namespace demo-prod"]
-            DeploymentProd[Deployment demo-app prod]
+        subgraph NS3["Namespaces additionnels"]
+            Staging[guacamole-staging]
+            Prod[guacamole-prod]
         end
     end
 
@@ -58,8 +55,10 @@ flowchart TB
     Docker --> Kind
     Kind --> Kubernetes
     GitHub --> RepoServer
-    Controller --> Deployment
-    Service --> Pod
+    Controller --> Web
+    Controller --> Guacd
+    Controller --> Db
+    Ingress --> Web
 ```
 
 ## Decoupage du repository
@@ -68,7 +67,7 @@ flowchart TB
 
 Zone des manifests applicatifs. C'est la partie metier du depot, independante du controleur GitOps lui-meme.
 
-Chaque application, comme `demo-app` ou `hello-app`, est organisee en:
+Guacamole est organise en:
 
 - `base/` pour les manifests communs;
 - `overlays/dev`;
@@ -103,7 +102,7 @@ Documentation de reference et guides d'exploitation.
 
 ### `AppProject`
 
-Le projet `demo-project` restreint:
+Le projet `bastion-project` restreint:
 
 - les repositories sources autorises;
 - la destination Kubernetes autorisee;
@@ -111,7 +110,7 @@ Le projet `demo-project` restreint:
 
 ### `Application`
 
-Les applications `demo-app-*` et `hello-app-*` definissent chacune:
+Les applications `guacamole-*` definissent chacune:
 
 - `repoURL`: le repository GitHub source;
 - `targetRevision`: la branche suivie;
@@ -124,21 +123,22 @@ Les applications `demo-app-*` et `hello-app-*` definissent chacune:
 - `kind` a ete retenu pour disposer d'un cluster local reproductible dans Docker.
 - Argo CD est epingle a `v3.3.4` pour limiter la derive de version.
 - Le repo GitHub est la source de verite, meme pour un lab local.
-- L'application de demo est volontairement minimale pour garder l'attention sur le GitOps.
+- L'Ingress local fournit des URLs stables pour preparer une future integration SAML.
+- PostgreSQL est persistant pour se rapprocher d'un bastion plus realiste.
 
 ## Limites actuelles
 
-- pas de gestion des secrets;
-- pas d'ingress public;
-- pas de pipeline CI de tests avances ou de deploiement;
-- pas d'observabilite avancee.
+- les secrets restent des placeholders de lab et ne sont pas chiffres;
+- l'Ingress local n'est pas encore protege en TLS;
+- il n'y a pas encore de SAML;
+- il n'y a pas d'observabilite avancee.
 
 ## Evolutions recommandees
 
 - enrichir la CI avec des controles plus pousses;
-- modeliser plusieurs applications;
-- introduire `ApplicationSet`;
-- ajouter une gestion de secrets compatible GitOps.
+- ajouter une gestion de secrets compatible GitOps;
+- activer TLS et SAML;
+- introduire `ApplicationSet` si la plateforme se duplique.
 
 ## Architecture cible du repository
 
@@ -146,7 +146,7 @@ La structure actuelle privilegie toujours l'apprentissage, mais elle adopte deja
 
 ```text
 apps/
-  demo-app/
+  guacamole/
     base/
     overlays/
       dev/
@@ -162,6 +162,6 @@ Cette cible permet:
 
 - une separation nette entre la base applicative et les variations par environnement;
 - une meilleure lisibilite des objets Argo CD;
-- une montee en charge plus propre vers plusieurs applications.
+- une evolution propre vers TLS, SAML et une gestion de secrets plus mature.
 
 Le detail de la strategie d'environnements est documente dans [docs/environment-strategy.md](/root/ArgoCD/docs/environment-strategy.md). Les prochaines evolutions possibles restent documentees dans [docs/target-structure.md](/root/ArgoCD/docs/target-structure.md).

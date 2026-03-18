@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Le projet adopte maintenant une structure multi-environnements afin de preparer une organisation plus proche d'un contexte reel, tout en gardant un point d'entree simple pour l'apprentissage.
+Le projet adopte une structure multi-environnements pour decrire un bastion Guacamole plus realiste, tout en gardant un parcours lisible pour un debutant.
 
 ## Principe
 
@@ -31,22 +31,21 @@ apps/<application>/
 
 ## Mapping actuel
 
-Le mapping suivant s'applique a chaque application (`demo-app` et `hello-app`):
+Le mapping suivant s'applique a Guacamole:
 
 | Environnement | Overlay | Namespace | Application Argo CD |
 | --- | --- | --- | --- |
-| `dev` | `apps/<application>/overlays/dev` | `demo` | `<application>-dev` |
-| `staging` | `apps/<application>/overlays/staging` | `demo-staging` | `<application>-staging` |
-| `prod` | `apps/<application>/overlays/prod` | `demo-prod` | `<application>-prod` |
+| `dev` | `apps/guacamole/overlays/dev` | `guacamole` | `guacamole-dev` |
+| `staging` | `apps/guacamole/overlays/staging` | `guacamole-staging` | `guacamole-staging` |
+| `prod` | `apps/guacamole/overlays/prod` | `guacamole-prod` | `guacamole-prod` |
 
 ## Garde-fou debutant
 
 Pour ne pas compliquer le parcours initial:
 
 - `make gitops-bootstrap` cible `dev` par defaut;
-- `make demo-ui` cible `dev` par defaut;
-- `make app-ui APP_NAME=hello-app` ouvre la seconde application;
-- `apps/demo-app/kustomization.yaml` et `apps/hello-app/kustomization.yaml` restent des points d'entree simples et pointent vers `dev`.
+- `make guacamole-ui` cible `dev` par defaut;
+- `apps/guacamole/kustomization.yaml` reste un point d'entree simple et pointe vers `dev`.
 
 Ainsi, un debutant peut continuer a suivre le lab sans se confronter tout de suite a la complexite multi-environnements.
 
@@ -79,20 +78,17 @@ make gitops-bootstrap-all
 Port-forward `dev`:
 
 ```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
+make guacamole-ui
 ```
 
 Port-forward `staging`:
 
 ```bash
-make demo-ui APP_ENV=staging
-make app-ui APP_NAME=hello-app APP_ENV=staging
+make guacamole-ui APP_ENV=staging
 ```
 
 Port-forward `prod`:
 
 ```bash
-make demo-ui APP_ENV=prod
-make app-ui APP_NAME=hello-app APP_ENV=prod
+make guacamole-ui APP_ENV=prod
 ```

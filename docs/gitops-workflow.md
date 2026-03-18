@@ -26,8 +26,8 @@ sequenceDiagram
 La source de verite est:
 
 - le repository GitHub;
-- la branche `main`;
-- le chemin de l'overlay cible, par exemple `apps/demo-app/overlays/dev`.
+- la branche `feat/guacamole-bastion` pour cette implementation;
+- le chemin de l'overlay cible, par exemple `apps/guacamole/overlays/dev`.
 
 Le poste local n'est jamais la source de verite finale tant qu'un changement n'est pas pousse.
 
@@ -36,7 +36,7 @@ Le poste local n'est jamais la source de verite finale tant qu'un changement n'e
 Le script [`scripts/bootstrap-gitops.sh`](/root/ArgoCD/scripts/bootstrap-gitops.sh#L1) verifie deux choses:
 
 - l'absence de modifications non committees;
-- la synchronisation stricte avec `origin/main`.
+- la synchronisation stricte avec la branche distante suivie.
 
 Ce comportement est volontaire. Il force une discipline GitOps saine:
 
@@ -57,10 +57,10 @@ Ce comportement est volontaire. Il force une discipline GitOps saine:
 
 Cas simple:
 
-1. modification du nombre de replicas dans `apps/demo-app/overlays/dev/deployment-patch.yaml`;
-2. commit et push sur `main`;
+1. modification d'un secret de base de donnees dans `apps/guacamole/overlays/dev/secret-patch.yaml`;
+2. commit et push sur `feat/guacamole-bastion`;
 3. Argo CD detecte un diff;
-4. le `Deployment` est mis a jour;
+4. le `Secret` et les ressources associees sont mis a jour;
 5. Kubernetes lance les nouveaux pods;
 6. l'application repasse en `Synced`.
 

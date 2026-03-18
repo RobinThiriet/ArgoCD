@@ -23,17 +23,17 @@ kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
 ### Ouvrir une application specifique
 
 ```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
-make app-ui APP_NAME=hello-app APP_ENV=staging
+make guacamole-ui
+make guacamole-ui APP_ENV=staging
+make guacamole-ui APP_ENV=prod
 ```
 
-### Recuperer les ressources de la demo
+### Recuperer les ressources Guacamole
 
 ```bash
-kubectl --context kind-argocd-lab -n demo get all
-kubectl --context kind-argocd-lab -n demo-staging get all
-kubectl --context kind-argocd-lab -n demo-prod get all
+kubectl --context kind-argocd-lab -n guacamole get all
+kubectl --context kind-argocd-lab -n guacamole-staging get all
+kubectl --context kind-argocd-lab -n guacamole-prod get all
 ```
 
 ### Valider le repository avant commit
@@ -71,24 +71,23 @@ kubectl --context kind-argocd-lab -n argocd logs <pod-name>
 Ca signifie en general:
 
 - qu'il reste des modifications locales non committees;
-- que le depot local n'est pas synchronise avec `origin/main`.
+- que le depot local n'est pas synchronise avec la branche distante suivie.
 
 Verifier:
 
 ```bash
 git status
-git fetch origin main
-git rev-list --left-right --count origin/main...HEAD
+git fetch origin feat/guacamole-bastion
+git rev-list --left-right --count origin/feat/guacamole-bastion...HEAD
 ```
 
-### L'application de demo n'apparait pas
+### L'application Guacamole n'apparait pas
 
 Verifier:
 
 ```bash
-kubectl --context kind-argocd-lab -n argocd get application demo-app-dev -o yaml
-kubectl --context kind-argocd-lab -n argocd get application hello-app-dev -o yaml
-kubectl --context kind-argocd-lab -n demo get all
+kubectl --context kind-argocd-lab -n argocd get application guacamole-dev -o yaml
+kubectl --context kind-argocd-lab -n guacamole get all
 ```
 
 ### Le port-forward est deja pris
@@ -97,12 +96,9 @@ Changer temporairement de port:
 
 ```bash
 kubectl --context kind-argocd-lab -n argocd port-forward svc/argocd-server 9090:443
-kubectl --context kind-argocd-lab -n demo port-forward svc/demo-app 9091:80
-kubectl --context kind-argocd-lab -n demo port-forward svc/hello-app 9191:80
-kubectl --context kind-argocd-lab -n demo-staging port-forward svc/demo-app 9092:80
-kubectl --context kind-argocd-lab -n demo-staging port-forward svc/hello-app 9192:80
-kubectl --context kind-argocd-lab -n demo-prod port-forward svc/demo-app 9093:80
-kubectl --context kind-argocd-lab -n demo-prod port-forward svc/hello-app 9193:80
+kubectl --context kind-argocd-lab -n guacamole port-forward svc/guacamole 9281:80
+kubectl --context kind-argocd-lab -n guacamole-staging port-forward svc/guacamole 9282:80
+kubectl --context kind-argocd-lab -n guacamole-prod port-forward svc/guacamole 9283:80
 ```
 
 ## Nettoyage complet

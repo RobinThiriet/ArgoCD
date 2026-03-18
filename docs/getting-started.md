@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Ce guide permet de lancer le lab de bout en bout sur un poste local.
+Ce guide permet de lancer le bastion Guacamole de bout en bout sur un poste local.
 
 ## Prerequis
 
@@ -32,9 +32,29 @@ Resultat attendu:
 
 - un cluster `kind` nomme `argocd-lab`;
 - un contexte Kubernetes `kind-argocd-lab`;
-- une base prete a accueillir `dev`, `staging` et `prod`.
+- une base prete a accueillir `dev`, `staging` et `prod` via Ingress local.
 
-## Etape 2 - Installer Argo CD
+## Etape 2 - Installer l'Ingress
+
+```bash
+make ingress-install
+```
+
+Puis afficher les entrees hosts a ajouter:
+
+```bash
+make hosts-print
+```
+
+Ajoute ensuite dans `/etc/hosts`:
+
+```text
+127.0.0.1 guacamole.local
+127.0.0.1 guacamole-staging.local
+127.0.0.1 guacamole-prod.local
+```
+
+## Etape 3 - Installer Argo CD
 
 ```bash
 make argocd-install
@@ -48,7 +68,7 @@ make status
 
 Tous les pods du namespace `argocd` doivent etre `Running`.
 
-## Etape 3 - Recuperer le mot de passe admin
+## Etape 4 - Recuperer le mot de passe admin
 
 ```bash
 make argocd-password
@@ -56,7 +76,7 @@ make argocd-password
 
 Conserve la valeur retourne pour la connexion initiale.
 
-## Etape 4 - Ouvrir l'UI Argo CD
+## Etape 5 - Ouvrir l'UI Argo CD
 
 Dans un terminal dedie:
 
@@ -75,17 +95,17 @@ Identifiants:
 - login: `admin`
 - password: sortie de `make argocd-password`
 
-## Etape 5 - Pousser le contenu du repository
+## Etape 6 - Pousser le contenu du repository
 
-Le bootstrap GitOps refuse de continuer si le depot n'est pas propre ou pas synchronise avec `origin/main`.
+Le bootstrap GitOps refuse de continuer si le depot n'est pas propre ou pas synchronise avec la branche distante suivie.
 
 ```bash
 git add .
-git commit -m "chore: bootstrap argocd lab"
-git push origin main
+git commit -m "chore: bootstrap guacamole bastion"
+git push origin feat/guacamole-bastion
 ```
 
-## Etape 6 - Bootstrap GitOps
+## Etape 7 - Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
@@ -93,10 +113,9 @@ make gitops-bootstrap
 
 Resultat attendu:
 
-- `demo-project` cree dans Argo CD;
-- `demo-app-dev` cree dans Argo CD;
-- `hello-app-dev` cree dans Argo CD;
-- namespace `demo` cree automatiquement lors de la sync;
+- `bastion-project` cree dans Argo CD;
+- `guacamole-dev` cree dans Argo CD;
+- namespace `guacamole` cree automatiquement lors de la sync;
 - application synchronisee automatiquement.
 
 Pour les autres environnements:
@@ -107,56 +126,51 @@ make gitops-bootstrap APP_ENV=prod
 make gitops-bootstrap-all
 ```
 
-## Etape 7 - Ouvrir l'application de demonstration
+## Etape 8 - Ouvrir Guacamole
+
+Mode Ingress recommande:
+
+```text
+http://guacamole.local
+```
+
+Mode port-forward si besoin:
 
 Dans un second terminal:
 
 ```bash
-make demo-ui
+make guacamole-ui
 ```
 
 Puis ouvrir:
 
 ```text
-http://localhost:8081
+http://localhost:8281
 ```
 
-Pour la seconde application:
+## Etape 9 - Tester un vrai changement GitOps
 
-```bash
-make app-ui APP_NAME=hello-app
-```
-
-Puis ouvrir:
-
-```text
-http://localhost:8181
-```
-
-## Etape 8 - Tester un vrai changement GitOps
-
-Modifier [`apps/demo-app/overlays/dev/deployment-patch.yaml`](/root/ArgoCD/apps/demo-app/overlays/dev/deployment-patch.yaml#L1):
+Modifier [`apps/guacamole/overlays/dev/secret-patch.yaml`](/root/ArgoCD/apps/guacamole/overlays/dev/secret-patch.yaml#L1):
 
 ```yaml
-spec:
-  replicas: 3
+POSTGRES_PASSWORD: CHANGE_ME_GUACAMOLE_DEV_DB_PASSWORD_V2
 ```
 
 Ensuite:
 
 ```bash
-git add apps/demo-app/overlays/dev/deployment-patch.yaml
-git commit -m "feat: scale demo app"
-git push origin main
+git add apps/guacamole/overlays/dev/secret-patch.yaml
+git commit -m "feat: rotate guacamole dev db password"
+git push origin feat/guacamole-bastion
 ```
 
 Verification:
 
 - dans l'UI Argo CD, l'application doit repasser en `Synced`;
-- dans Kubernetes, le nombre de replicas doit evoluer.
+- dans Kubernetes, le `Secret` et les pods doivent refléter le changement.
 
 Commande utile:
 
 ```bash
-kubectl --context kind-argocd-lab -n demo get deploy demo-app
+kubectl --context kind-argocd-lab -n guacamole get all
 ```

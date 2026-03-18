@@ -4,17 +4,17 @@ set -euo pipefail
 CLUSTER_NAME="${CLUSTER_NAME:-argocd-lab}"
 KUBE_CONTEXT="kind-${CLUSTER_NAME}"
 APP_ENV="${APP_ENV:-dev}"
-APP_NAME="${APP_NAME:-demo-app}"
+APP_NAME="${APP_NAME:-guacamole}"
 
 case "${APP_ENV}" in
   dev)
-    NAMESPACE="demo"
+    NAMESPACE="guacamole"
     ;;
   staging)
-    NAMESPACE="demo-staging"
+    NAMESPACE="guacamole-staging"
     ;;
   prod)
-    NAMESPACE="demo-prod"
+    NAMESPACE="guacamole-prod"
     ;;
   *)
     echo "Valeur APP_ENV invalide: ${APP_ENV}"
@@ -24,20 +24,6 @@ case "${APP_ENV}" in
 esac
 
 case "${APP_NAME}" in
-  demo-app)
-    case "${APP_ENV}" in
-      dev) LOCAL_PORT="${LOCAL_PORT:-8081}" ;;
-      staging) LOCAL_PORT="${LOCAL_PORT:-8082}" ;;
-      prod) LOCAL_PORT="${LOCAL_PORT:-8083}" ;;
-    esac
-    ;;
-  hello-app)
-    case "${APP_ENV}" in
-      dev) LOCAL_PORT="${LOCAL_PORT:-8181}" ;;
-      staging) LOCAL_PORT="${LOCAL_PORT:-8182}" ;;
-      prod) LOCAL_PORT="${LOCAL_PORT:-8183}" ;;
-    esac
-    ;;
   guacamole)
     case "${APP_ENV}" in
       dev) LOCAL_PORT="${LOCAL_PORT:-8281}" ;;
@@ -47,7 +33,7 @@ case "${APP_NAME}" in
     ;;
   *)
     echo "Valeur APP_NAME invalide: ${APP_NAME}"
-    echo "Valeurs supportees: demo-app, hello-app, guacamole"
+    echo "Valeurs supportees: guacamole"
     exit 1
     ;;
 esac

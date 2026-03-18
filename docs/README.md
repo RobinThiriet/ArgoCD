@@ -1,19 +1,21 @@
 # Documentation
 
-Ce dossier centralise la documentation du projet afin de separer:
+Ce dossier centralise la documentation du bastion Guacamole deployee avec Argo CD et GitOps.
+
+Il separe:
 
 - la vue executive dans le `README` racine;
-- la documentation d'architecture;
-- les guides operatoires;
-- les notes de decisions d'architecture.
+- l'architecture de la plateforme;
+- les guides de prise en main et d'exploitation;
+- les decisions d'architecture.
 
 ## Table de lecture recommandee
 
-1. [getting-started.md](/root/ArgoCD/docs/getting-started.md) pour lancer le lab une premiere fois.
+1. [getting-started.md](/root/ArgoCD/docs/getting-started.md) pour lancer le bastion une premiere fois.
 2. [architecture.md](/root/ArgoCD/docs/architecture.md) pour comprendre les composants.
-3. [application-catalog.md](/root/ArgoCD/docs/application-catalog.md) pour voir les applications presentes.
+3. [application-catalog.md](/root/ArgoCD/docs/application-catalog.md) pour la fiche Guacamole.
 4. [environment-strategy.md](/root/ArgoCD/docs/environment-strategy.md) pour comprendre `dev/staging/prod`.
-5. [gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md) pour comprendre le cycle de reconciliation.
+5. [gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md) pour le cycle GitOps.
 6. [runbook.md](/root/ArgoCD/docs/runbook.md) pour les operations courantes.
 7. [glossary.md](/root/ArgoCD/docs/glossary.md) pour les notions importantes.
 

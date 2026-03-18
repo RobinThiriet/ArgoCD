@@ -23,7 +23,7 @@ jobs:
         run: bash -n scripts/*.sh
 
       - name: Validate Kustomize rendering
-        run: kubectl kustomize apps/demo-app >/dev/null
+        run: kubectl kustomize apps/guacamole >/dev/null
 
       - name: Validate Make target
         run: make validate

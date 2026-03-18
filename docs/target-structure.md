@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce document decrit maintenant la prochaine marche de maturite pour accompagner la croissance vers plusieurs applications, plus de standardisation et davantage d'automatisation.
+Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce document decrit la cible de maturite pour un bastion Guacamole maintenable, plus securise et plus simple a faire evoluer.
 
 ## Structure cible
 
@@ -13,30 +13,19 @@ Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce d
 |-- README.md
 |-- CONTRIBUTING.md
 |-- apps
-|   |-- demo-app
-|   |   |-- base
-|   |   `-- overlays
-|   |       |-- dev
-|   |       |-- staging
-|   |       `-- prod
-|   |-- hello-app
-|   |   |-- base
-|   |   `-- overlays
-|   |       |-- dev
-|   |       |-- staging
-|   |       `-- prod
-|   `-- second-app
-|       `-- ...
+|   `-- guacamole
+|       |-- base
+|       `-- overlays
+|           |-- dev
+|           |-- staging
+|           `-- prod
 |-- argocd
 |   |-- projects
-|   |   `-- demo-project.yaml
+|   |   `-- bastion-project.yaml
 |   `-- applications
-|       |-- demo-app-dev.yaml
-|       |-- demo-app-staging.yaml
-|       |-- demo-app-prod.yaml
-|       |-- hello-app-dev.yaml
-|       |-- hello-app-staging.yaml
-|       `-- hello-app-prod.yaml
+|       |-- guacamole-dev.yaml
+|       |-- guacamole-staging.yaml
+|       `-- guacamole-prod.yaml
 |-- docs
 |   |-- architecture.md
 |   |-- repository-standards.md
@@ -52,22 +41,21 @@ Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce d
 - `overlays/` porte les variations par environnement;
 - `argocd/projects/` centralise les `AppProject`;
 - `argocd/applications/` decrit les applications par environnement;
-- chaque application reste isolee et lisible.
+- le bastion reste lisible, meme quand on ajoute TLS, SAML ou une vraie gestion des secrets.
 
 ## Chemin de migration recommande
 
 1. conserver le fonctionnement simple pour `dev`;
-2. ajouter une seconde application;
-3. factoriser davantage les conventions entre applications;
-4. envisager `ApplicationSet` si le nombre de cibles augmente;
+2. ajouter TLS sur l'Ingress;
+3. introduire une gestion de secrets GitOps-compatible;
+4. activer SAML et les variables associees;
 5. introduire une pipeline CI plus riche;
-6. ajouter la gestion des secrets et politiques.
+6. envisager `ApplicationSet` si la plateforme se duplique pour d'autres bastions.
 
 ## Pourquoi garder des points d'entree simples
 
 Bien que le projet soit passe a `dev/staging/prod`, il conserve des points d'entree debutants:
 
 - `make gitops-bootstrap` cible `dev`;
-- `make demo-ui` cible `dev`;
-- `make app-ui APP_NAME=hello-app` ouvre la seconde application;
-- `apps/demo-app/kustomization.yaml` pointe vers l'overlay `dev`.
+- `make guacamole-ui` cible `dev`;
+- `apps/guacamole/kustomization.yaml` pointe vers l'overlay `dev`.

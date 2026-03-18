@@ -4,9 +4,9 @@ ARGOCD_VERSION ?= v3.3.4
 INGRESS_VERSION ?= controller-v1.14.1
 REPO_BRANCH ?= $(shell git branch --show-current 2>/dev/null || echo main)
 APP_ENV ?= dev
-APP_NAME ?= demo-app
+APP_NAME ?= guacamole
 
-.PHONY: help cluster-up ingress-install hosts-print argocd-install argocd-password argocd-ui gitops-bootstrap gitops-bootstrap-all demo-ui guacamole-ui app-ui status validate destroy
+.PHONY: help cluster-up ingress-install hosts-print argocd-install argocd-password argocd-ui gitops-bootstrap gitops-bootstrap-all guacamole-ui app-ui status validate destroy
 
 help:
 	@printf '%s\n' \
@@ -19,9 +19,8 @@ help:
 		'  make argocd-ui         Ouvre un port-forward vers Argo CD (bloquant)' \
 		'  make gitops-bootstrap  Bootstrap toutes les apps d un environnement (defaut: dev)' \
 		'  make gitops-bootstrap-all Bootstrap dev, staging et prod' \
-		'  make demo-ui           Alias de compatibilite vers demo-app (defaut: dev)' \
 		'  make guacamole-ui      Ouvre Guacamole en port-forward (defaut: dev)' \
-		'  make app-ui            Ouvre une app locale avec APP_NAME et APP_ENV' \
+		'  make app-ui            Alias generique vers Guacamole avec APP_ENV' \
 		'  make status            Affiche l etat general du cluster' \
 		'  make validate          Verifie scripts et manifests locaux' \
 		'  make destroy           Supprime le cluster kind'
@@ -50,9 +49,6 @@ gitops-bootstrap:
 gitops-bootstrap-all:
 	@CLUSTER_NAME=$(CLUSTER_NAME) ARGOCD_NAMESPACE=$(ARGOCD_NAMESPACE) REPO_BRANCH=$(REPO_BRANCH) APP_ENV=all ./scripts/bootstrap-gitops.sh
 
-demo-ui:
-	@CLUSTER_NAME=$(CLUSTER_NAME) APP_ENV=$(APP_ENV) APP_NAME=demo-app ./scripts/port-forward-app.sh
-
 guacamole-ui:
 	@CLUSTER_NAME=$(CLUSTER_NAME) APP_ENV=$(APP_ENV) APP_NAME=guacamole ./scripts/port-forward-app.sh
 
@@ -68,7 +64,7 @@ status:
 	@printf '\n'
 	@kubectl --context kind-$(CLUSTER_NAME) get applications.argoproj.io -n $(ARGOCD_NAMESPACE) 2>/dev/null || true
 	@printf '\n'
-	@for ns in demo demo-staging demo-prod guacamole guacamole-staging guacamole-prod; do \
+	@for ns in guacamole guacamole-staging guacamole-prod; do \
 		printf '%s\n' "$$ns:"; \
 		kubectl --context kind-$(CLUSTER_NAME) get all -n $$ns 2>/dev/null || true; \
 		printf '\n'; \

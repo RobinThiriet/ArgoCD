@@ -31,7 +31,7 @@ Exemple:
 
 ```text
 apps/
-  demo-app/
+  guacamole/
     base/
     overlays/
       dev/
@@ -89,7 +89,7 @@ Une Pull Request doit:
 ## Standards de documentation
 
 - le `README` doit fournir la vue d'ensemble du projet;
-- `docs/architecture.md` doit refleter l'architecture courante et la cible;
+- `docs/architecture.md` doit refleter l'architecture courante du bastion;
 - les nouveaux concepts doivent etre relies au glossaire si utiles;
 - les changements structurants doivent etre traces dans `docs/adr/`.
 
