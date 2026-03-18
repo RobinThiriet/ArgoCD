@@ -136,6 +136,8 @@ Pour le detail architectural, voir [docs/architecture.md](/root/ArgoCD/docs/arch
 .
 |-- Makefile
 |-- README.md
+|-- Workflow
+|   `-- README.md
 |-- apps
 |   |-- demo-app
 |   |   |-- base
@@ -380,6 +382,7 @@ Conventions recommandees:
 - [Catalogue d'applications](/root/ArgoCD/docs/application-catalog.md)
 - [Strategie d'environnements](/root/ArgoCD/docs/environment-strategy.md)
 - [Workflow GitOps](/root/ArgoCD/docs/gitops-workflow.md)
+- [Workflow d'utilisation Argo CD](/root/ArgoCD/Workflow/README.md)
 - [Runbook d'exploitation](/root/ArgoCD/docs/runbook.md)
 - [Glossaire](/root/ArgoCD/docs/glossary.md)
 - [Repository standards](/root/ArgoCD/docs/repository-standards.md)
