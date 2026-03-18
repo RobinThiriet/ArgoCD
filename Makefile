@@ -2,7 +2,7 @@ CLUSTER_NAME ?= argocd-lab
 ARGOCD_NAMESPACE ?= argocd
 ARGOCD_VERSION ?= v3.3.4
 INGRESS_VERSION ?= controller-v1.14.1
-REPO_BRANCH ?= main
+REPO_BRANCH ?= $(shell git branch --show-current 2>/dev/null || echo main)
 APP_ENV ?= dev
 APP_NAME ?= demo-app
 
