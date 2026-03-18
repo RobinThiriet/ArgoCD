@@ -39,9 +39,17 @@ flowchart TB
         end
 
         subgraph NS2["Namespace demo"]
-            Deployment[Deployment demo-app]
-            Service[Service demo-app]
-            Pod[Pod whoami]
+            Deployment[Deployment demo-app dev]
+            Service[Service demo-app dev]
+            Pod[Pod whoami dev]
+        end
+
+        subgraph NS3["Namespace demo-staging"]
+            DeploymentStaging[Deployment demo-app staging]
+        end
+
+        subgraph NS4["Namespace demo-prod"]
+            DeploymentProd[Deployment demo-app prod]
         end
     end
 
@@ -59,12 +67,19 @@ flowchart TB
 
 Zone des manifests applicatifs. C'est la partie metier du depot, independante du controleur GitOps lui-meme.
 
+L'application `demo-app` est organisee en:
+
+- `base/` pour les manifests communs;
+- `overlays/dev`;
+- `overlays/staging`;
+- `overlays/prod`.
+
 ### `argocd/`
 
 Zone de pilotage Argo CD:
 
-- `AppProject` pour definir le perimetre d'autorisation;
-- `Application` pour declarer quoi deployer, depuis ou, et vers quelle destination.
+- `projects/` pour definir le perimetre d'autorisation;
+- `applications/` pour declarer quoi deployer, depuis ou, et vers quelle destination.
 
 ### `scripts/`
 
@@ -76,7 +91,7 @@ Documentation de reference et guides d'exploitation.
 
 ## Flux de controle
 
-1. le developpeur modifie les manifests dans `apps/demo-app`;
+1. le developpeur modifie la `base` ou l'overlay cible dans `apps/demo-app`;
 2. le changement est commit et pousse sur GitHub;
 3. Argo CD detecte une difference entre Git et le cluster;
 4. Argo CD applique le manifeste cible dans Kubernetes;
@@ -95,11 +110,11 @@ Le projet `demo-project` restreint:
 
 ### `Application`
 
-L'application `demo-app` definit:
+Les applications `demo-app-dev`, `demo-app-staging` et `demo-app-prod` definissent chacune:
 
 - `repoURL`: le repository GitHub source;
 - `targetRevision`: la branche suivie;
-- `path`: le chemin de l'application dans le repo;
+- `path`: le chemin de l'overlay vise dans le repo;
 - `destination`: le cluster et namespace cibles;
 - `syncPolicy.automated`: l'auto-sync et l'auto-heal.
 
@@ -128,7 +143,7 @@ L'application `demo-app` definit:
 
 ## Architecture cible du repository
 
-La structure actuelle privilegie l'apprentissage. A moyen terme, la trajectoire recommande est la suivante:
+La structure actuelle privilegie toujours l'apprentissage, mais elle adopte deja une organisation multi-environnements:
 
 ```text
 apps/
@@ -150,4 +165,4 @@ Cette cible permet:
 - une meilleure lisibilite des objets Argo CD;
 - une montee en charge plus propre vers plusieurs applications.
 
-Le detail de cette projection est documente dans [docs/target-structure.md](/root/ArgoCD/docs/target-structure.md).
+Le detail de la strategie d'environnements est documente dans [docs/environment-strategy.md](/root/ArgoCD/docs/environment-strategy.md). Les prochaines evolutions possibles restent documentees dans [docs/target-structure.md](/root/ArgoCD/docs/target-structure.md).

@@ -27,7 +27,7 @@ La source de verite est:
 
 - le repository GitHub;
 - la branche `main`;
-- le chemin `apps/demo-app`.
+- le chemin de l'overlay cible, par exemple `apps/demo-app/overlays/dev`.
 
 Le poste local n'est jamais la source de verite finale tant qu'un changement n'est pas pousse.
 
@@ -57,7 +57,7 @@ Ce comportement est volontaire. Il force une discipline GitOps saine:
 
 Cas simple:
 
-1. modification du nombre de replicas dans `apps/demo-app/deployment.yaml`;
+1. modification du nombre de replicas dans `apps/demo-app/overlays/dev/deployment-patch.yaml`;
 2. commit et push sur `main`;
 3. Argo CD detecte un diff;
 4. le `Deployment` est mis a jour;
@@ -68,6 +68,7 @@ Cas simple:
 
 - faire des changements petits et lisibles;
 - versionner les manifests Argo CD et applicatifs dans le meme depot au debut;
+- centraliser le commun dans `base/` et les differences dans `overlays/`;
 - conserver une separation claire entre definition applicative et pilotage GitOps;
 - eviter les modifications manuelles dans le cluster;
 - utiliser des messages de commit explicites.

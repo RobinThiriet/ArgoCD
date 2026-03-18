@@ -24,6 +24,8 @@ kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
 
 ```bash
 kubectl --context kind-argocd-lab -n demo get all
+kubectl --context kind-argocd-lab -n demo-staging get all
+kubectl --context kind-argocd-lab -n demo-prod get all
 ```
 
 ### Valider le repository avant commit
@@ -76,7 +78,7 @@ git rev-list --left-right --count origin/main...HEAD
 Verifier:
 
 ```bash
-kubectl --context kind-argocd-lab -n argocd get application demo-app -o yaml
+kubectl --context kind-argocd-lab -n argocd get application demo-app-dev -o yaml
 kubectl --context kind-argocd-lab -n demo get all
 ```
 
@@ -87,6 +89,8 @@ Changer temporairement de port:
 ```bash
 kubectl --context kind-argocd-lab -n argocd port-forward svc/argocd-server 9090:443
 kubectl --context kind-argocd-lab -n demo port-forward svc/demo-app 9091:80
+kubectl --context kind-argocd-lab -n demo-staging port-forward svc/demo-app 9092:80
+kubectl --context kind-argocd-lab -n demo-prod port-forward svc/demo-app 9093:80
 ```
 
 ## Nettoyage complet

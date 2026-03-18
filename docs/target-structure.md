@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Le depot courant est volontairement simple. Ce document decrit une structure cible plus mature pour accompagner la croissance du projet vers plusieurs applications et plusieurs environnements.
+Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce document decrit maintenant la prochaine marche de maturite pour accompagner la croissance vers plusieurs applications, plus de standardisation et davantage d'automatisation.
 
 ## Structure cible
 
@@ -15,16 +15,10 @@ Le depot courant est volontairement simple. Ce document decrit une structure cib
 |-- apps
 |   |-- demo-app
 |   |   |-- base
-|   |   |   |-- deployment.yaml
-|   |   |   |-- service.yaml
-|   |   |   `-- kustomization.yaml
 |   |   `-- overlays
 |   |       |-- dev
-|   |       |   `-- kustomization.yaml
 |   |       |-- staging
-|   |       |   `-- kustomization.yaml
 |   |       `-- prod
-|   |           `-- kustomization.yaml
 |   `-- second-app
 |       `-- ...
 |-- argocd
@@ -53,13 +47,17 @@ Le depot courant est volontairement simple. Ce document decrit une structure cib
 
 ## Chemin de migration recommande
 
-1. conserver l'application actuelle telle quelle pour la phase d'apprentissage;
-2. introduire `base/` et `overlays/dev`;
-3. ajouter `staging` et `prod`;
-4. separer `argocd/` en `projects/` et `applications/`;
-5. introduire une seconde application;
-6. envisager `ApplicationSet` si le nombre de cibles augmente.
+1. conserver le fonctionnement simple pour `dev`;
+2. ajouter une seconde application;
+3. factoriser davantage les conventions entre applications;
+4. envisager `ApplicationSet` si le nombre de cibles augmente;
+5. introduire une pipeline CI plus riche;
+6. ajouter la gestion des secrets et politiques.
 
-## Pourquoi ne pas l'imposer des maintenant
+## Pourquoi garder des points d'entree simples
 
-La structure cible serait trop lourde pour un premier contact avec Argo CD. Le depot reste donc volontairement simple au debut, tout en rendant explicite la trajectoire d'evolution.
+Bien que le projet soit passe a `dev/staging/prod`, il conserve des points d'entree debutants:
+
+- `make gitops-bootstrap` cible `dev`;
+- `make demo-ui` cible `dev`;
+- `apps/demo-app/kustomization.yaml` pointe vers l'overlay `dev`.

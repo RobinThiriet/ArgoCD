@@ -31,7 +31,8 @@ make cluster-up
 Resultat attendu:
 
 - un cluster `kind` nomme `argocd-lab`;
-- un contexte Kubernetes `kind-argocd-lab`.
+- un contexte Kubernetes `kind-argocd-lab`;
+- une base prete a accueillir `dev`, `staging` et `prod`.
 
 ## Etape 2 - Installer Argo CD
 
@@ -93,9 +94,17 @@ make gitops-bootstrap
 Resultat attendu:
 
 - `demo-project` cree dans Argo CD;
-- `demo-app` cree dans Argo CD;
+- `demo-app-dev` cree dans Argo CD;
 - namespace `demo` cree automatiquement lors de la sync;
 - application synchronisee automatiquement.
+
+Pour les autres environnements:
+
+```bash
+make gitops-bootstrap APP_ENV=staging
+make gitops-bootstrap APP_ENV=prod
+make gitops-bootstrap-all
+```
 
 ## Etape 7 - Ouvrir l'application de demonstration
 
@@ -113,7 +122,7 @@ http://localhost:8081
 
 ## Etape 8 - Tester un vrai changement GitOps
 
-Modifier [`apps/demo-app/deployment.yaml`](/root/ArgoCD/apps/demo-app/deployment.yaml#L1):
+Modifier [`apps/demo-app/overlays/dev/deployment-patch.yaml`](/root/ArgoCD/apps/demo-app/overlays/dev/deployment-patch.yaml#L1):
 
 ```yaml
 spec:
@@ -123,7 +132,7 @@ spec:
 Ensuite:
 
 ```bash
-git add apps/demo-app/deployment.yaml
+git add apps/demo-app/overlays/dev/deployment-patch.yaml
 git commit -m "feat: scale demo app"
 git push origin main
 ```

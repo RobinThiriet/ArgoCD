@@ -32,7 +32,17 @@ Exemple:
 ```text
 apps/
   demo-app/
+    base/
+    overlays/
+      dev/
+      staging/
+      prod/
 ```
+
+La regle generale est:
+
+- `base/` pour le commun;
+- `overlays/` pour les differences par environnement.
 
 ### Objets Argo CD
 

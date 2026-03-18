@@ -1,12 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: demo
-
 resources:
-  - deployment.yaml
-  - service.yaml
-
-commonLabels:
-  app.kubernetes.io/name: demo-app
-  app.kubernetes.io/part-of: argocd-lab
+  - overlays/dev
