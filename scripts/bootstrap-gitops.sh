@@ -27,8 +27,8 @@ if [[ "${behind}" != "0" || "${ahead}" != "0" ]]; then
   exit 1
 fi
 
-echo "Application du projet Argo CD..."
-kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/projects/demo-project.yaml
+echo "Application des projets Argo CD..."
+kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/projects
 
 case "${APP_ENV}" in
   dev)

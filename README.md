@@ -137,9 +137,14 @@ Pour le detail architectural, voir [docs/architecture.md](/root/ArgoCD/docs/arch
 |-- Makefile
 |-- README.md
 |-- Workflow
-|   `-- README.md
+|   |-- README.md
+|   `-- guacamole-bastion.md
 |-- apps
 |   |-- demo-app
+|   |   |-- base
+|   |   |-- kustomization.yaml
+|   |   `-- overlays
+|   |-- guacamole
 |   |   |-- base
 |   |   |-- kustomization.yaml
 |   |   `-- overlays
@@ -150,11 +155,14 @@ Pour le detail architectural, voir [docs/architecture.md](/root/ArgoCD/docs/arch
 |-- argocd
 |   |-- applications
 |   |   |-- demo-app-dev.yaml
+|   |   |-- guacamole-dev.yaml
 |   |   |-- hello-app-dev.yaml
 |   |   |-- demo-app-prod.yaml
+|   |   |-- guacamole-prod.yaml
 |   |   |-- hello-app-prod.yaml
 |   |   `-- demo-app-staging.yaml
 |   `-- projects
+|       |-- bastion-project.yaml
 |       `-- demo-project.yaml
 |-- docs
 |   |-- README.md
@@ -363,12 +371,15 @@ Conventions recommandees:
 | --- | --- |
 | `make help` | Affiche les commandes disponibles. |
 | `make cluster-up` | Cree le cluster `kind`. |
+| `make ingress-install` | Installe ingress-nginx pour les URLs locales. |
+| `make hosts-print` | Affiche les entrees `/etc/hosts` a ajouter pour Guacamole. |
 | `make argocd-install` | Installe Argo CD dans le namespace `argocd`. |
 | `make argocd-password` | Affiche le mot de passe admin initial. |
 | `make argocd-ui` | Port-forward vers l'interface Argo CD. |
 | `make gitops-bootstrap` | Applique toutes les applications d'un environnement Argo CD. |
 | `make gitops-bootstrap-all` | Applique toutes les applications sur `dev`, `staging` et `prod`. |
 | `make demo-ui` | Ouvre `demo-app` en local. |
+| `make guacamole-ui` | Ouvre Guacamole en port-forward. |
 | `make app-ui APP_NAME=hello-app` | Ouvre une application specifique en local. |
 | `make status` | Affiche l'etat du cluster, d'Argo CD et des applications. |
 | `make validate` | Verifie les scripts shell et le rendu Kustomize. |
@@ -383,6 +394,7 @@ Conventions recommandees:
 - [Strategie d'environnements](/root/ArgoCD/docs/environment-strategy.md)
 - [Workflow GitOps](/root/ArgoCD/docs/gitops-workflow.md)
 - [Workflow d'utilisation Argo CD](/root/ArgoCD/Workflow/README.md)
+- [Workflow Guacamole Bastion](/root/ArgoCD/Workflow/guacamole-bastion.md)
 - [Runbook d'exploitation](/root/ArgoCD/docs/runbook.md)
 - [Glossaire](/root/ArgoCD/docs/glossary.md)
 - [Repository standards](/root/ArgoCD/docs/repository-standards.md)

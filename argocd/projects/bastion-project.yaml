@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bastion-project
+  namespace: argocd
+spec:
+  description: Projet GitOps pour la plateforme bastion Guacamole
+  sourceRepos:
+    - https://github.com/RobinThiriet/ArgoCD.git
+  destinations:
+    - namespace: guacamole
+      server: https://kubernetes.default.svc
+    - namespace: guacamole-staging
+      server: https://kubernetes.default.svc
+    - namespace: guacamole-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guacamole-prod
+  namespace: argocd
+spec:
+  project: bastion-project
+  source:
+    repoURL: https://github.com/RobinThiriet/ArgoCD.git
+    targetRevision: feat/guacamole-bastion
+    path: apps/guacamole/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guacamole-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -20,13 +20,21 @@ Ce document decrit les applications actuellement presentes dans le repository af
 - service: `svc/hello-app`;
 - namespaces cibles: `demo`, `demo-staging`, `demo-prod`.
 
+### `guacamole`
+
+- role: bastion d'acces distant web;
+- images: `guacamole/guacamole:1.6.0`, `guacamole/guacd:1.6.0`, `postgres:16-alpine`;
+- service: `svc/guacamole`;
+- namespaces cibles: `guacamole`, `guacamole-staging`, `guacamole-prod`;
+- acces Ingress: `guacamole.local`, `guacamole-staging.local`, `guacamole-prod.local`.
+
 ## Applications Argo CD generees
 
 | Environnement | Applications |
 | --- | --- |
-| `dev` | `demo-app-dev`, `hello-app-dev` |
-| `staging` | `demo-app-staging`, `hello-app-staging` |
-| `prod` | `demo-app-prod`, `hello-app-prod` |
+| `dev` | `demo-app-dev`, `hello-app-dev`, `guacamole-dev` |
+| `staging` | `demo-app-staging`, `hello-app-staging`, `guacamole-staging` |
+| `prod` | `demo-app-prod`, `hello-app-prod`, `guacamole-prod` |
 
 ## Acces local
 
@@ -58,6 +66,28 @@ Ports par defaut:
 - `8182` pour `staging`
 - `8183` pour `prod`
 
+### `guacamole`
+
+Acces Ingress recommande:
+
+- `http://guacamole.local`
+- `http://guacamole-staging.local`
+- `http://guacamole-prod.local`
+
+Acces port-forward de secours:
+
+```bash
+make guacamole-ui
+make guacamole-ui APP_ENV=staging
+make guacamole-ui APP_ENV=prod
+```
+
+Ports par defaut:
+
+- `8281` pour `dev`
+- `8282` pour `staging`
+- `8283` pour `prod`
+
 ## Convention de nommage
 
 Pour garder un bootstrap evolutif, les manifests Argo CD suivent la convention:
@@ -69,6 +99,7 @@ Pour garder un bootstrap evolutif, les manifests Argo CD suivent la convention:
 Exemples:
 
 - `demo-app-dev.yaml`
+- `guacamole-dev.yaml`
 - `hello-app-staging.yaml`
 - `hello-app-prod.yaml`
 

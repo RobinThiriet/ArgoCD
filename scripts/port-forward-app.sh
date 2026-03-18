@@ -38,9 +38,16 @@ case "${APP_NAME}" in
       prod) LOCAL_PORT="${LOCAL_PORT:-8183}" ;;
     esac
     ;;
+  guacamole)
+    case "${APP_ENV}" in
+      dev) LOCAL_PORT="${LOCAL_PORT:-8281}" ;;
+      staging) LOCAL_PORT="${LOCAL_PORT:-8282}" ;;
+      prod) LOCAL_PORT="${LOCAL_PORT:-8283}" ;;
+    esac
+    ;;
   *)
     echo "Valeur APP_NAME invalide: ${APP_NAME}"
-    echo "Valeurs supportees: demo-app, hello-app"
+    echo "Valeurs supportees: demo-app, hello-app, guacamole"
     exit 1
     ;;
 esac
