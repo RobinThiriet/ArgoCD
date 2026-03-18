@@ -1,0 +1,29 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.29.15
+
+      - name: Validate shell scripts
+        run: bash -n scripts/*.sh
+
+      - name: Validate Kustomize rendering
+        run: kubectl kustomize apps/demo-app >/dev/null
+
+      - name: Validate Make target
+        run: make validate
