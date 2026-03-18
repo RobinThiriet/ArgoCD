@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: CHANGE_ME_GUACAMOLE_HOST
+    - host: guacamole.local
       http:
         paths:
           - path: /

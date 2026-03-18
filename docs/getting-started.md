@@ -6,21 +6,11 @@ Ce guide permet de lancer le bastion Guacamole de bout en bout sur un poste loca
 
 ## Prerequis
 
-- Docker fonctionnel
+- Docker
 - `kubectl`
 - `kind`
 - `git`
 - `make`
-
-Verification rapide:
-
-```bash
-docker --version
-kubectl version --client=true
-kind version
-git --version
-make --version
-```
 
 ## Etape 1 - Creer le cluster
 
@@ -28,84 +18,35 @@ make --version
 make cluster-up
 ```
 
-Resultat attendu:
-
-- un cluster `kind` nomme `argocd-lab`;
-- un contexte Kubernetes `kind-argocd-lab`;
-- une base prete a accueillir `dev`, `staging` et `prod` via Ingress local.
-
 ## Etape 2 - Installer l'Ingress
 
 ```bash
 make ingress-install
-```
-
-Puis afficher les entrees hosts a ajouter:
-
-```bash
 make hosts-print
 ```
 
-Ajoute ensuite dans `/etc/hosts`:
+Ajouter ensuite dans `/etc/hosts`:
 
 ```text
 127.0.0.1 guacamole.local
-127.0.0.1 guacamole-staging.local
-127.0.0.1 guacamole-prod.local
 ```
 
 ## Etape 3 - Installer Argo CD
 
 ```bash
 make argocd-install
-```
-
-Verification:
-
-```bash
-make status
-```
-
-Tous les pods du namespace `argocd` doivent etre `Running`.
-
-## Etape 4 - Recuperer le mot de passe admin
-
-```bash
 make argocd-password
 ```
 
-Conserve la valeur retourne pour la connexion initiale.
-
-## Etape 5 - Ouvrir l'UI Argo CD
-
-Dans un terminal dedie:
-
-```bash
-make argocd-ui
-```
-
-Puis ouvrir:
-
-```text
-https://localhost:8080
-```
-
-Identifiants:
-
-- login: `admin`
-- password: sortie de `make argocd-password`
-
-## Etape 6 - Pousser le contenu du repository
-
-Le bootstrap GitOps refuse de continuer si le depot n'est pas propre ou pas synchronise avec la branche distante suivie.
+## Etape 4 - Pousser le repository
 
 ```bash
 git add .
-git commit -m "chore: bootstrap guacamole bastion"
+git commit -m "chore: simplify guacamole platform"
 git push origin feat/guacamole-bastion
 ```
 
-## Etape 7 - Bootstrap GitOps
+## Etape 5 - Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
@@ -113,64 +54,31 @@ make gitops-bootstrap
 
 Resultat attendu:
 
-- `bastion-project` cree dans Argo CD;
-- `guacamole-dev` cree dans Argo CD;
-- namespace `guacamole` cree automatiquement lors de la sync;
-- application synchronisee automatiquement.
+- `bastion-project` cree dans Argo CD
+- `guacamole` cree dans Argo CD
+- namespace `guacamole` cree automatiquement
 
-Pour les autres environnements:
+## Etape 6 - Ouvrir Guacamole
 
-```bash
-make gitops-bootstrap APP_ENV=staging
-make gitops-bootstrap APP_ENV=prod
-make gitops-bootstrap-all
-```
-
-## Etape 8 - Ouvrir Guacamole
-
-Mode Ingress recommande:
+Acces recommande:
 
 ```text
 http://guacamole.local
 ```
 
-Mode port-forward si besoin:
-
-Dans un second terminal:
+Acces port-forward:
 
 ```bash
 make guacamole-ui
 ```
 
-Puis ouvrir:
+## Etape 7 - Tester un changement GitOps
 
-```text
-http://localhost:8281
-```
-
-## Etape 9 - Tester un vrai changement GitOps
-
-Modifier [`apps/guacamole/overlays/dev/secret-patch.yaml`](/root/ArgoCD/apps/guacamole/overlays/dev/secret-patch.yaml#L1):
-
-```yaml
-POSTGRES_PASSWORD: CHANGE_ME_GUACAMOLE_DEV_DB_PASSWORD_V2
-```
-
-Ensuite:
+Modifier [`apps/guacamole/base/secret.yaml`](/root/ArgoCD/apps/guacamole/base/secret.yaml#L1), puis:
 
 ```bash
-git add apps/guacamole/overlays/dev/secret-patch.yaml
-git commit -m "feat: rotate guacamole dev db password"
+make validate
+git add .
+git commit -m "feat: update guacamole db secret"
 git push origin feat/guacamole-bastion
-```
-
-Verification:
-
-- dans l'UI Argo CD, l'application doit repasser en `Synced`;
-- dans Kubernetes, le `Secret` et les pods doivent refléter le changement.
-
-Commande utile:
-
-```bash
-kubectl --context kind-argocd-lab -n guacamole get all
 ```

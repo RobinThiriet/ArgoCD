@@ -10,10 +10,6 @@ spec:
   destinations:
     - namespace: guacamole
       server: https://kubernetes.default.svc
-    - namespace: guacamole-staging
-      server: https://kubernetes.default.svc
-    - namespace: guacamole-prod
-      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
