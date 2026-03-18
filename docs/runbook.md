@@ -20,6 +20,14 @@ kubectl --context kind-argocd-lab -n argocd get pods
 kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
 ```
 
+### Ouvrir une application specifique
+
+```bash
+make demo-ui
+make app-ui APP_NAME=hello-app
+make app-ui APP_NAME=hello-app APP_ENV=staging
+```
+
 ### Recuperer les ressources de la demo
 
 ```bash
@@ -79,6 +87,7 @@ Verifier:
 
 ```bash
 kubectl --context kind-argocd-lab -n argocd get application demo-app-dev -o yaml
+kubectl --context kind-argocd-lab -n argocd get application hello-app-dev -o yaml
 kubectl --context kind-argocd-lab -n demo get all
 ```
 
@@ -89,8 +98,11 @@ Changer temporairement de port:
 ```bash
 kubectl --context kind-argocd-lab -n argocd port-forward svc/argocd-server 9090:443
 kubectl --context kind-argocd-lab -n demo port-forward svc/demo-app 9091:80
+kubectl --context kind-argocd-lab -n demo port-forward svc/hello-app 9191:80
 kubectl --context kind-argocd-lab -n demo-staging port-forward svc/demo-app 9092:80
+kubectl --context kind-argocd-lab -n demo-staging port-forward svc/hello-app 9192:80
 kubectl --context kind-argocd-lab -n demo-prod port-forward svc/demo-app 9093:80
+kubectl --context kind-argocd-lab -n demo-prod port-forward svc/hello-app 9193:80
 ```
 
 ## Nettoyage complet

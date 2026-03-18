@@ -33,15 +33,15 @@ kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/pro
 case "${APP_ENV}" in
   dev)
     echo "Application GitOps de l'environnement dev..."
-    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/demo-app-dev.yaml
+    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/*-dev.yaml
     ;;
   staging)
     echo "Application GitOps de l'environnement staging..."
-    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/demo-app-staging.yaml
+    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/*-staging.yaml
     ;;
   prod)
     echo "Application GitOps de l'environnement prod..."
-    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/demo-app-prod.yaml
+    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/*-prod.yaml
     ;;
   all)
     echo "Application GitOps de tous les environnements..."

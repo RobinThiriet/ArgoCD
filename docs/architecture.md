@@ -17,6 +17,7 @@ flowchart LR
     Dev -->|make / kubectl| Cluster[kind cluster]
     GitHub -->|repoURL| ArgoCD[Argo CD]
     ArgoCD -->|sync| Demo[demo-app]
+    ArgoCD -->|sync| Hello[hello-app]
 ```
 
 ## Vue de deploiement
@@ -67,7 +68,7 @@ flowchart TB
 
 Zone des manifests applicatifs. C'est la partie metier du depot, independante du controleur GitOps lui-meme.
 
-L'application `demo-app` est organisee en:
+Chaque application, comme `demo-app` ou `hello-app`, est organisee en:
 
 - `base/` pour les manifests communs;
 - `overlays/dev`;
@@ -91,7 +92,7 @@ Documentation de reference et guides d'exploitation.
 
 ## Flux de controle
 
-1. le developpeur modifie la `base` ou l'overlay cible dans `apps/demo-app`;
+1. le developpeur modifie la `base` ou l'overlay cible de l'application concernee dans `apps/`;
 2. le changement est commit et pousse sur GitHub;
 3. Argo CD detecte une difference entre Git et le cluster;
 4. Argo CD applique le manifeste cible dans Kubernetes;
@@ -110,7 +111,7 @@ Le projet `demo-project` restreint:
 
 ### `Application`
 
-Les applications `demo-app-dev`, `demo-app-staging` et `demo-app-prod` definissent chacune:
+Les applications `demo-app-*` et `hello-app-*` definissent chacune:
 
 - `repoURL`: le repository GitHub source;
 - `targetRevision`: la branche suivie;
@@ -128,15 +129,13 @@ Les applications `demo-app-dev`, `demo-app-staging` et `demo-app-prod` definisse
 ## Limites actuelles
 
 - pas de gestion des secrets;
-- pas de separation `dev` / `staging` / `prod`;
 - pas d'ingress public;
-- pas de pipeline CI;
+- pas de pipeline CI de tests avances ou de deploiement;
 - pas d'observabilite avancee.
 
 ## Evolutions recommandees
 
-- introduire Kustomize overlays par environnement;
-- ajouter des checks de validation dans CI;
+- enrichir la CI avec des controles plus pousses;
 - modeliser plusieurs applications;
 - introduire `ApplicationSet`;
 - ajouter une gestion de secrets compatible GitOps.

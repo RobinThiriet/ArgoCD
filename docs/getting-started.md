@@ -95,6 +95,7 @@ Resultat attendu:
 
 - `demo-project` cree dans Argo CD;
 - `demo-app-dev` cree dans Argo CD;
+- `hello-app-dev` cree dans Argo CD;
 - namespace `demo` cree automatiquement lors de la sync;
 - application synchronisee automatiquement.
 
@@ -118,6 +119,18 @@ Puis ouvrir:
 
 ```text
 http://localhost:8081
+```
+
+Pour la seconde application:
+
+```bash
+make app-ui APP_NAME=hello-app
+```
+
+Puis ouvrir:
+
+```text
+http://localhost:8181
 ```
 
 ## Etape 8 - Tester un vrai changement GitOps

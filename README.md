@@ -22,6 +22,7 @@ Ce depot a deux objectifs:
 - [Structure du repository](#structure-du-repository)
 - [Demarrage rapide](#demarrage-rapide)
 - [Workflow GitOps](#workflow-gitops)
+- [Catalogue d'applications](#catalogue-dapplications)
 - [Strategie d'environnements](#strategie-denvironnements)
 - [Standards du depot](#standards-du-depot)
 - [Commandes utiles](#commandes-utiles)
@@ -36,6 +37,7 @@ Ce projet met en place un socle GitOps local compose de:
 - un cluster Kubernetes local cree avec `kind`;
 - une installation Argo CD complete dans le namespace `argocd`;
 - une application de demonstration deployee via plusieurs environnements;
+- une seconde application pour illustrer la montee en charge du repository;
 - un flux GitOps ou GitHub devient la source de verite.
 
 Le depot est pense comme un mini environnement de reference: lisible, scriptable, documente, et suffisamment structure pour evoluer vers plusieurs applications par la suite.
@@ -59,9 +61,10 @@ flowchart LR
     M --> K[kind cluster]
     K --> A[Namespace argocd]
     A --> AC[Argo CD Application]
-    AC --> D[Namespace demo]
+    AC --> D[Namespaces par environnement]
     G -->|source of truth| AC
     D --> APP[demo-app]
+    D --> HELLO[hello-app]
 ```
 
 ### Plan architectural
@@ -92,6 +95,8 @@ flowchart TB
             Service[Service demo-app]
             Deploy[Deployment demo-app]
             Pods[Pods whoami]
+            HelloSvc[Service hello-app]
+            HelloDeploy[Deployment hello-app]
         end
     end
 
@@ -110,7 +115,7 @@ flowchart TB
 | --- | --- |
 | `kind` | Cree un cluster Kubernetes local dans Docker. |
 | `argocd/` | Contient les objets Argo CD (`AppProject`, `Application`) par environnement. |
-| `apps/demo-app/` | Contient la `base` commune et les `overlays` `dev/staging/prod`. |
+| `apps/` | Contient les applications Kubernetes versionnees (`demo-app`, `hello-app`). |
 | `scripts/` | Automatise les operations locales recurrentes. |
 | `Makefile` | Fournit un point d'entree operable et lisible. |
 | GitHub | Source de verite du flux GitOps. |
@@ -132,31 +137,26 @@ Pour le detail architectural, voir [docs/architecture.md](/root/ArgoCD/docs/arch
 |-- Makefile
 |-- README.md
 |-- apps
-|   `-- demo-app
+|   |-- demo-app
+|   |   |-- base
+|   |   |-- kustomization.yaml
+|   |   `-- overlays
+|   `-- hello-app
 |       |-- base
-|       |   |-- deployment.yaml
-|       |   |-- kustomization.yaml
-|       |   `-- service.yaml
 |       |-- kustomization.yaml
 |       `-- overlays
-|           |-- dev
-|           |   |-- deployment-patch.yaml
-|           |   `-- kustomization.yaml
-|           |-- prod
-|           |   |-- deployment-patch.yaml
-|           |   `-- kustomization.yaml
-|           `-- staging
-|               |-- deployment-patch.yaml
-|               `-- kustomization.yaml
 |-- argocd
 |   |-- applications
 |   |   |-- demo-app-dev.yaml
+|   |   |-- hello-app-dev.yaml
 |   |   |-- demo-app-prod.yaml
+|   |   |-- hello-app-prod.yaml
 |   |   `-- demo-app-staging.yaml
 |   `-- projects
 |       `-- demo-project.yaml
 |-- docs
 |   |-- README.md
+|   |-- application-catalog.md
 |   |-- architecture.md
 |   |-- environment-strategy.md
 |   |-- getting-started.md
@@ -171,8 +171,9 @@ Pour le detail architectural, voir [docs/architecture.md](/root/ArgoCD/docs/arch
     |-- bootstrap-gitops.sh
     |-- create-cluster.sh
     |-- install-argocd.sh
+    |-- port-forward-app.sh
     |-- port-forward-argocd.sh
-    `-- port-forward-demo.sh
+    `-- ...
 ```
 
 ## Demarrage rapide
@@ -241,7 +242,7 @@ make gitops-bootstrap
 Cette commande applique:
 
 - le `AppProject` `demo-project`;
-- l'`Application` `demo-app-dev`;
+- toutes les `Application` de l'environnement `dev`;
 - la configuration de synchronisation automatique sur l'environnement `dev`.
 
 ### 7. Exposer l'application de demonstration
@@ -256,6 +257,18 @@ Acces navigateur:
 
 ```text
 http://localhost:8081
+```
+
+Seconde application:
+
+```bash
+make app-ui APP_NAME=hello-app
+```
+
+Acces navigateur:
+
+```text
+http://localhost:8181
 ```
 
 Le guide detaille est disponible dans [docs/getting-started.md](/root/ArgoCD/docs/getting-started.md).
@@ -280,6 +293,23 @@ Exemple de premier exercice:
 
 Le detail du cycle est documente dans [docs/gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md).
 
+## Catalogue d'applications
+
+Le repository contient maintenant deux applications pour montrer comment le modele GitOps evolue quand le nombre d'apps augmente.
+
+| Application | Role | Image | Service |
+| --- | --- | --- | --- |
+| `demo-app` | Application de demonstration principale | `traefik/whoami:v1.10.1` | `svc/demo-app` |
+| `hello-app` | Seconde application d'exemple pour illustrer la scalabilite du depot | `nginxdemos/hello:0.4` | `svc/hello-app` |
+
+Exemples d'acces local:
+
+```bash
+make demo-ui
+make app-ui APP_NAME=hello-app
+make app-ui APP_NAME=hello-app APP_ENV=staging
+```
+
 ## Strategie d'environnements
 
 Le depot supporte maintenant une vraie organisation `dev/staging/prod`:
@@ -288,11 +318,13 @@ Le depot supporte maintenant une vraie organisation `dev/staging/prod`:
 - `overlays/dev` cible le namespace `demo`;
 - `overlays/staging` cible le namespace `demo-staging`;
 - `overlays/prod` cible le namespace `demo-prod`.
+- chaque environnement peut contenir plusieurs applications Argo CD.
 
 Par souci de simplicite:
 
 - `make gitops-bootstrap` deploye `dev` par defaut;
 - `make demo-ui` ouvre `dev` par defaut;
+- `make app-ui APP_NAME=hello-app` ouvre la seconde application;
 - `apps/demo-app/kustomization.yaml` continue a fournir un point d'entree simple pour `dev`.
 
 Exemples:
@@ -302,6 +334,7 @@ make gitops-bootstrap APP_ENV=staging
 make gitops-bootstrap APP_ENV=prod
 make gitops-bootstrap-all
 make demo-ui APP_ENV=staging
+make app-ui APP_NAME=hello-app APP_ENV=prod
 ```
 
 La strategie complete est decrite dans [docs/environment-strategy.md](/root/ArgoCD/docs/environment-strategy.md).
@@ -331,9 +364,11 @@ Conventions recommandees:
 | `make argocd-install` | Installe Argo CD dans le namespace `argocd`. |
 | `make argocd-password` | Affiche le mot de passe admin initial. |
 | `make argocd-ui` | Port-forward vers l'interface Argo CD. |
-| `make gitops-bootstrap` | Applique le projet et l'application Argo CD. |
-| `make demo-ui` | Port-forward vers l'application de demonstration. |
-| `make status` | Affiche l'etat du cluster, d'Argo CD et de l'application. |
+| `make gitops-bootstrap` | Applique toutes les applications d'un environnement Argo CD. |
+| `make gitops-bootstrap-all` | Applique toutes les applications sur `dev`, `staging` et `prod`. |
+| `make demo-ui` | Ouvre `demo-app` en local. |
+| `make app-ui APP_NAME=hello-app` | Ouvre une application specifique en local. |
+| `make status` | Affiche l'etat du cluster, d'Argo CD et des applications. |
 | `make validate` | Verifie les scripts shell et le rendu Kustomize. |
 | `make destroy` | Supprime le cluster local. |
 
@@ -342,6 +377,7 @@ Conventions recommandees:
 - [Documentation index](/root/ArgoCD/docs/README.md)
 - [Architecture](/root/ArgoCD/docs/architecture.md)
 - [Getting started](/root/ArgoCD/docs/getting-started.md)
+- [Catalogue d'applications](/root/ArgoCD/docs/application-catalog.md)
 - [Strategie d'environnements](/root/ArgoCD/docs/environment-strategy.md)
 - [Workflow GitOps](/root/ArgoCD/docs/gitops-workflow.md)
 - [Runbook d'exploitation](/root/ArgoCD/docs/runbook.md)

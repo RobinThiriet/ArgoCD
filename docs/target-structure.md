@@ -19,6 +19,12 @@ Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce d
 |   |       |-- dev
 |   |       |-- staging
 |   |       `-- prod
+|   |-- hello-app
+|   |   |-- base
+|   |   `-- overlays
+|   |       |-- dev
+|   |       |-- staging
+|   |       `-- prod
 |   `-- second-app
 |       `-- ...
 |-- argocd
@@ -27,7 +33,10 @@ Le depot courant supporte deja `base/overlays` et plusieurs environnements. Ce d
 |   `-- applications
 |       |-- demo-app-dev.yaml
 |       |-- demo-app-staging.yaml
-|       `-- demo-app-prod.yaml
+|       |-- demo-app-prod.yaml
+|       |-- hello-app-dev.yaml
+|       |-- hello-app-staging.yaml
+|       `-- hello-app-prod.yaml
 |-- docs
 |   |-- architecture.md
 |   |-- repository-standards.md
@@ -60,4 +69,5 @@ Bien que le projet soit passe a `dev/staging/prod`, il conserve des points d'ent
 
 - `make gitops-bootstrap` cible `dev`;
 - `make demo-ui` cible `dev`;
+- `make app-ui APP_NAME=hello-app` ouvre la seconde application;
 - `apps/demo-app/kustomization.yaml` pointe vers l'overlay `dev`.
