@@ -2,21 +2,20 @@
 
 ## Objectif
 
-Ce guide decrit le workflow normal pour deployer et exploiter le bastion Guacamole sur cette branche simplifiee.
+Ce guide decrit le parcours complet pour deployer et exploiter le bastion Guacamole sur cette branche.
 
 ## Ce que deploie cette branche
 
-- `guacamole`
-- `guacd`
-- `postgresql`
-- un `Secret` Kubernetes avec placeholders documentes
-- un `Ingress` local sur `guacamole.local`
+- `guacamole`;
+- `guacd`;
+- `postgresql`;
+- un `Secret` Kubernetes avec placeholders documentes;
+- un `Ingress` local sur `guacamole.local`;
+- un acces local Argo CD sur `argocd.local`.
 
-## URL locale
+## Parcours recommande
 
-- `http://guacamole.local`
-
-## 1. Recreer le cluster local
+### 1. Reinitialiser le lab si besoin
 
 ```bash
 make destroy
@@ -25,9 +24,7 @@ make ingress-install
 make argocd-install
 ```
 
-## 2. Ajouter l'entree hosts
-
-Afficher la ligne a ajouter:
+### 2. Ajouter les entrees hosts
 
 ```bash
 make hosts-print
@@ -40,41 +37,30 @@ Puis ajouter dans `/etc/hosts`:
 127.0.0.1 guacamole.local
 ```
 
-## 3. Comprendre le secret placeholder
+### 3. Verifier l'acces Argo CD
 
-Le `Secret` versionne dans Git contient une valeur de type:
+- URL: `http://argocd.local`
+- mot de passe admin: `make argocd-password`
 
-```text
-CHANGE_ME_GUACAMOLE_DB_PASSWORD
-```
-
-Ce n'est pas un vrai secret de production. C'est un placeholder documente pour:
-
-- garder le repo publiable
-- montrer la structure GitOps complete
-- eviter de pousser un vrai mot de passe
-
-## 4. Bootstrap GitOps
+### 4. Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
 ```
 
-## 5. Verifier le deploiement
+### 5. Verifier le deploiement
 
 ```bash
 make status
 ```
 
-Application Argo CD attendue:
+Etat attendu:
 
-- `guacamole`
+- application Argo CD `guacamole` presente;
+- pods `guacamole`, `guacamole-guacd` et `guacamole-postgresql` en cours d'execution;
+- Ingress `guacamole` disponible.
 
-Acces Argo CD:
-
-- `http://argocd.local`
-
-## 6. Acceder a Guacamole
+### 6. Acceder a Guacamole
 
 Mode Ingress:
 
@@ -86,23 +72,24 @@ Mode port-forward si besoin:
 make guacamole-ui
 ```
 
-## 7. Connexion initiale
+### 7. Connexion initiale
 
 Identifiants par defaut:
 
-- utilisateur: `guacadmin`
-- mot de passe: `guacadmin`
+- utilisateur: `guacadmin`;
+- mot de passe: `guacadmin`.
 
 Action recommandee:
 
-- changer immediatement le mot de passe administrateur
+- changer immediatement le mot de passe administrateur.
 
-## 8. Modifier un parametre
+### 8. Modifier un parametre en GitOps
 
-Exemple:
+Exemples de fichiers:
 
-- modifier `apps/guacamole/base/secret.yaml`
-- ou `apps/guacamole/base/ingress.yaml`
+- `apps/guacamole/base/secret.yaml`;
+- `apps/guacamole/base/ingress.yaml`;
+- `apps/guacamole/base/guacamole-deployment.yaml`.
 
 Puis:
 

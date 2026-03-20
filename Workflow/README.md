@@ -2,36 +2,32 @@
 
 ## Objectif
 
-Ce document decrit le workflow normal d'utilisation d'Argo CD dans cette branche, centree sur un seul Guacamole.
+Ce document decrit le workflow quotidien a suivre sur la branche `feat/guacamole-bastion`.
 
 ## Sequence normale
 
-1. identifier le changement a faire
-2. modifier les manifests dans `apps/guacamole`
-3. lancer `make validate`
-4. commit et push
-5. laisser Argo CD synchroniser
-6. verifier l'etat `Synced` et `Healthy`
-7. tester sur `http://guacamole.local`
+1. identifier le changement a faire;
+2. modifier les manifests dans `apps/guacamole`;
+3. lancer `make validate`;
+4. commit et push sur `feat/guacamole-bastion`;
+5. laisser Argo CD synchroniser;
+6. verifier l'etat `Synced` et `Healthy`;
+7. tester sur `http://guacamole.local`.
 
 ## Logique a adopter
 
-Avec Argo CD, on ne pense pas:
+Avec Argo CD, on n'agit pas d'abord dans le cluster.
 
-- "je vais modifier le cluster"
-
-On pense:
-
-- "je vais decrire dans Git l'etat que je veux"
+On decrit d'abord dans Git l'etat cible, puis Argo CD applique cet etat.
 
 Git est la source de verite.
 
 ## Endroits utiles dans le repository
 
-- `apps/guacamole/base/` pour les manifests communs
-- `apps/guacamole/kustomization.yaml` pour le point d'entree deploye
-- `argocd/applications/guacamole.yaml` pour l'application Argo CD
-- `argocd/projects/bastion-project.yaml` pour le perimetre Argo CD
+- `apps/guacamole/base/` pour les manifests applicatifs;
+- `apps/guacamole/kustomization.yaml` pour le point d'entree deploye;
+- `argocd/applications/guacamole.yaml` pour l'application Argo CD;
+- `argocd/projects/bastion-project.yaml` pour le perimetre autorise.
 
 ## Commandes quotidiennes
 

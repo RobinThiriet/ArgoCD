@@ -9,22 +9,30 @@
 
 Repository GitOps pour deployer un bastion Apache Guacamole sur Kubernetes avec Argo CD, `kind` et Docker.
 
-Cette branche est volontairement simple:
+Cette branche `feat/guacamole-bastion` est volontairement recentree sur une plateforme unique:
 
-- une seule application `guacamole`
-- un seul namespace `guacamole`
-- une seule URL `http://guacamole.local`
-- une seule `Application` Argo CD
+- une seule application metier: `guacamole`;
+- un seul namespace applicatif: `guacamole`;
+- un acces local stable via Ingress;
+- une seule `Application` Argo CD;
+- un parcours GitOps simple a suivre pas a pas.
 
-## Vision
+## Vue d'ensemble
 
-Le projet sert a travailler en direct sur une seule plateforme Guacamole sans separation `dev/staging/prod`.
+La plateforme deploie:
+
+- `guacamole` pour l'interface web;
+- `guacd` pour le broker de sessions;
+- `postgresql` pour la persistance;
+- un `Ingress` local pour `guacamole.local`;
+- un acces local a Argo CD via `argocd.local`.
 
 GitHub reste la source de verite:
 
-- tu modifies les manifests dans `apps/guacamole`
-- tu commits et tu pushes
-- Argo CD synchronise automatiquement le cluster
+1. tu modifies les manifests dans `apps/guacamole`;
+2. tu lances `make validate`;
+3. tu commit et tu push;
+4. Argo CD synchronise automatiquement le cluster.
 
 ## Architecture
 
@@ -38,7 +46,7 @@ flowchart LR
     Guacamole --> PostgreSQL[PostgreSQL]
 ```
 
-Le detail est dans [docs/architecture.md](/root/ArgoCD/docs/architecture.md#L1).
+Le detail est dans [docs/architecture.md](/root/ArgoCD/docs/architecture.md).
 
 ## Structure du repository
 
@@ -56,24 +64,31 @@ Le detail est dans [docs/architecture.md](/root/ArgoCD/docs/architecture.md#L1).
 |-- argocd
 |   |-- applications
 |   |   `-- guacamole.yaml
+|   |-- local-access
 |   `-- projects
 |       `-- bastion-project.yaml
 |-- docs
-|   |-- architecture.md
-|   |-- getting-started.md
-|   |-- gitops-workflow.md
-|   `-- ...
+|-- kind
 `-- scripts
-    `-- ...
 ```
 
 ## Demarrage rapide
+
+### Prerequis
+
+- Docker
+- `kubectl`
+- `kind`
+- `git`
+- `make`
 
 ### 1. Creer le cluster
 
 ```bash
 make cluster-up
 ```
+
+Cette etape cree un cluster `kind` avec les ports `80` et `443` exposes en local pour l'Ingress.
 
 ### 2. Installer l'Ingress local
 
@@ -85,6 +100,7 @@ make hosts-print
 Ajoute ensuite dans `/etc/hosts`:
 
 ```text
+127.0.0.1 argocd.local
 127.0.0.1 guacamole.local
 ```
 
@@ -95,7 +111,7 @@ make argocd-install
 make argocd-password
 ```
 
-UI Argo CD:
+Acces Argo CD:
 
 ```text
 http://argocd.local
@@ -105,15 +121,24 @@ http://argocd.local
 
 ```bash
 git add .
-git commit -m "chore: simplify guacamole platform"
+git commit -m "chore: update guacamole bastion"
 git push origin feat/guacamole-bastion
 ```
+
+Le bootstrap GitOps verifie que le depot local est propre et synchronise avec `origin/feat/guacamole-bastion`.
 
 ### 5. Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
 ```
+
+Resultat attendu:
+
+- `bastion-project` cree dans Argo CD;
+- `guacamole` cree dans Argo CD;
+- namespace `guacamole` cree automatiquement;
+- application `Synced` et `Healthy` apres reconciliation.
 
 ### 6. Ouvrir Guacamole
 
@@ -123,26 +148,37 @@ Acces recommande:
 http://guacamole.local
 ```
 
-Acces port-forward de secours:
+Acces de secours en port-forward:
 
 ```bash
 make guacamole-ui
 ```
 
+### 7. Connexion initiale
+
+Identifiants Guacamole par defaut:
+
+- utilisateur: `guacadmin`;
+- mot de passe: `guacadmin`.
+
+Action recommandee:
+
+- changer immediatement le mot de passe administrateur apres la premiere connexion.
+
 ## Workflow GitOps
 
 Le workflow normal est:
 
-1. modifier `apps/guacamole`
-2. lancer `make validate`
-3. commit et push
-4. laisser Argo CD synchroniser
-5. verifier dans l'UI Argo CD
-6. tester sur `http://guacamole.local`
+1. modifier `apps/guacamole`;
+2. lancer `make validate`;
+3. commit et push;
+4. laisser Argo CD synchroniser;
+5. verifier dans `http://argocd.local`;
+6. tester sur `http://guacamole.local`.
 
 ## Gestion des secrets
 
-Les `Secret` versionnes dans Git contiennent des placeholders, par exemple:
+Le `Secret` versionne dans Git contient des placeholders, par exemple:
 
 ```text
 CHANGE_ME_GUACAMOLE_DB_PASSWORD
@@ -150,9 +186,9 @@ CHANGE_ME_GUACAMOLE_DB_PASSWORD
 
 Le but est:
 
-- de garder le repository publiable
-- de ne pas pousser de vrais mots de passe dans GitHub
-- de conserver un lab GitOps fonctionnel
+- de garder le repository publiable;
+- de ne pas pousser de vrais mots de passe dans Git;
+- de conserver un lab GitOps fonctionnel.
 
 ## Commandes utiles
 
@@ -160,10 +196,10 @@ Le but est:
 | --- | --- |
 | `make cluster-up` | Cree le cluster `kind`. |
 | `make ingress-install` | Installe `ingress-nginx`. |
-| `make hosts-print` | Affiche la ligne `/etc/hosts` a ajouter. |
-| `make argocd-install` | Installe Argo CD. |
+| `make hosts-print` | Affiche les entrees `/etc/hosts` a ajouter. |
+| `make argocd-install` | Installe Argo CD et l'acces local Ingress. |
 | `make argocd-password` | Recupere le mot de passe admin initial. |
-| `make argocd-ui` | Ouvre l'UI Argo CD en port-forward de secours. |
+| `make argocd-ui` | Ouvre un port-forward de secours vers Argo CD. |
 | `make gitops-bootstrap` | Cree l'application Guacamole dans Argo CD. |
 | `make guacamole-ui` | Ouvre Guacamole en port-forward. |
 | `make status` | Affiche l'etat du cluster. |
@@ -172,15 +208,15 @@ Le but est:
 
 ## Documentation detaillee
 
-- [Workflow/README.md](/root/ArgoCD/Workflow/README.md#L1)
-- [Workflow/guacamole-bastion.md](/root/ArgoCD/Workflow/guacamole-bastion.md#L1)
-- [docs/getting-started.md](/root/ArgoCD/docs/getting-started.md#L1)
-- [docs/architecture.md](/root/ArgoCD/docs/architecture.md#L1)
-- [docs/gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md#L1)
-- [docs/runbook.md](/root/ArgoCD/docs/runbook.md#L1)
+- [Workflow/README.md](/root/ArgoCD/Workflow/README.md)
+- [Workflow/guacamole-bastion.md](/root/ArgoCD/Workflow/guacamole-bastion.md)
+- [docs/getting-started.md](/root/ArgoCD/docs/getting-started.md)
+- [docs/architecture.md](/root/ArgoCD/docs/architecture.md)
+- [docs/gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md)
+- [docs/runbook.md](/root/ArgoCD/docs/runbook.md)
 
 ## Prochaines evolutions
 
-- activer TLS
-- integrer le SSO SAML
-- remplacer les placeholders de secrets par une solution GitOps-compatible
+- activer TLS;
+- integrer le SSO SAML;
+- remplacer les placeholders de secrets par une solution GitOps-compatible.
