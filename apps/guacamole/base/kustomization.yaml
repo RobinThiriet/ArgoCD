@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - secret.yaml
+  - saml-configmap.yaml
   - postgresql-service.yaml
   - postgresql-statefulset.yaml
   - guacd-service.yaml

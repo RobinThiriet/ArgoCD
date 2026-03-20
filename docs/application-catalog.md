@@ -9,6 +9,7 @@
 - service: `svc/guacamole`
 - namespace cible: `guacamole`
 - acces Ingress: `guacamole.local`
+- authentification: PostgreSQL active, SAML prepare mais desactive par defaut
 
 ## Application Argo CD
 
