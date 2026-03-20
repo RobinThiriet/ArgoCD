@@ -78,10 +78,10 @@ kubectl --context kind-argocd-lab -n argocd get pods
 ```bash
 git add .
 git commit -m "chore: update guacamole bastion"
-git push origin feat/guacamole-bastion
+git push origin main
 ```
 
-Le bootstrap GitOps ne continue que si le depot local est propre et synchronise avec `origin/feat/guacamole-bastion`.
+Le bootstrap GitOps ne continue que si le depot local est propre et synchronise avec `origin/main`.
 
 ## Etape 5 - Bootstrap GitOps
 
@@ -136,7 +136,7 @@ Modifier par exemple [`apps/guacamole/base/ingress.yaml`](/root/ArgoCD/apps/guac
 make validate
 git add .
 git commit -m "feat: update guacamole configuration"
-git push origin feat/guacamole-bastion
+git push origin main
 ```
 
 Verification:

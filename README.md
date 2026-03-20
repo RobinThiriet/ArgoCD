@@ -1,6 +1,6 @@
 # Argo CD Guacamole Bastion
 
-[![Validate](https://img.shields.io/github/actions/workflow/status/RobinThiriet/ArgoCD/validate.yml?branch=feat%2Fguacamole-bastion&label=validate)](https://github.com/RobinThiriet/ArgoCD/actions/workflows/validate.yml)
+[![Validate](https://img.shields.io/github/actions/workflow/status/RobinThiriet/ArgoCD/validate.yml?branch=main&label=validate)](https://github.com/RobinThiriet/ArgoCD/actions/workflows/validate.yml)
 [![Kubernetes](https://img.shields.io/badge/kubernetes-v1.29+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Argo%20CD](https://img.shields.io/badge/argo%20cd-v3.3.4-EF7B4D?logo=argo&logoColor=white)](https://argo-cd.readthedocs.io/)
 [![GitOps](https://img.shields.io/badge/practice-GitOps-0A7B83)](https://opengitops.dev/)
@@ -9,7 +9,7 @@
 
 Repository GitOps pour deployer un bastion Apache Guacamole sur Kubernetes avec Argo CD, `kind` et Docker.
 
-Cette branche `feat/guacamole-bastion` est volontairement recentree sur une plateforme unique:
+Le repository est volontairement recentre sur une plateforme unique:
 
 - une seule application metier: `guacamole`;
 - un seul namespace applicatif: `guacamole`;
@@ -122,10 +122,10 @@ http://argocd.local
 ```bash
 git add .
 git commit -m "chore: update guacamole bastion"
-git push origin feat/guacamole-bastion
+git push origin main
 ```
 
-Le bootstrap GitOps verifie que le depot local est propre et synchronise avec `origin/feat/guacamole-bastion`.
+Le bootstrap GitOps verifie que le depot local est propre et synchronise avec `origin/main`.
 
 ### 5. Bootstrap GitOps
 

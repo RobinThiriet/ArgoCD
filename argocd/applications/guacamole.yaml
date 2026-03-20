@@ -7,7 +7,7 @@ spec:
   project: bastion-project
   source:
     repoURL: https://github.com/RobinThiriet/ArgoCD.git
-    targetRevision: feat/guacamole-bastion
+    targetRevision: main
     path: apps/guacamole
   destination:
     server: https://kubernetes.default.svc

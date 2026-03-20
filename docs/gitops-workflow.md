@@ -25,7 +25,7 @@ sequenceDiagram
 ## Source de verite
 
 - le repository GitHub
-- la branche `feat/guacamole-bastion`
+- la branche `main`
 - le chemin `apps/guacamole`
 
 ## Exemple de changement

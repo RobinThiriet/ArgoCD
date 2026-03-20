@@ -97,7 +97,7 @@ Puis:
 make validate
 git add .
 git commit -m "feat: update guacamole configuration"
-git push origin feat/guacamole-bastion
+git push origin main
 ```
 
 Argo CD resynchronisera ensuite automatiquement.

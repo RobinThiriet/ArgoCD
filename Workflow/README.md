@@ -2,14 +2,14 @@
 
 ## Objectif
 
-Ce document decrit le workflow quotidien a suivre sur la branche `feat/guacamole-bastion`.
+Ce document decrit le workflow quotidien a suivre sur la branche principale du repository.
 
 ## Sequence normale
 
 1. identifier le changement a faire;
 2. modifier les manifests dans `apps/guacamole`;
 3. lancer `make validate`;
-4. commit et push sur `feat/guacamole-bastion`;
+4. commit et push sur `main`;
 5. laisser Argo CD synchroniser;
 6. verifier l'etat `Synced` et `Healthy`;
 7. tester sur `http://guacamole.local`.
@@ -35,7 +35,7 @@ Git est la source de verite.
 make validate
 git add .
 git commit -m "feat: describe the change"
-git push origin feat/guacamole-bastion
+git push origin main
 make status
 ```
 

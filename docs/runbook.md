@@ -92,8 +92,8 @@ Verifier:
 
 ```bash
 git status
-git fetch origin feat/guacamole-bastion
-git rev-list --left-right --count origin/feat/guacamole-bastion...HEAD
+git fetch origin main
+git rev-list --left-right --count origin/main...HEAD
 ```
 
 ### Guacamole ne demarre pas correctement
