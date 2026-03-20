@@ -8,38 +8,83 @@
 make status
 ```
 
+### Recuperer les pods Ingress
+
+```bash
+kubectl --context kind-argocd-lab -n ingress-nginx get pods
+```
+
 ### Recuperer les pods Argo CD
 
 ```bash
 kubectl --context kind-argocd-lab -n argocd get pods
 ```
 
-### Recuperer les applications Argo CD
+### Recuperer l'application Argo CD
 
 ```bash
 kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
+kubectl --context kind-argocd-lab -n argocd get application guacamole -o yaml
 ```
 
-### Ouvrir une application specifique
+### Recuperer les ressources Guacamole
 
 ```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
+kubectl --context kind-argocd-lab -n guacamole get all
+kubectl --context kind-argocd-lab -n guacamole get ingress
+kubectl --context kind-argocd-lab -n guacamole get pvc
 ```
 
-### Recuperer les ressources applicatives
+### Acces locaux
+
+- Argo CD: `http://argocd.local`
+- Guacamole: `http://guacamole.local`
+
+### Port-forward de secours
 
 ```bash
-kubectl --context kind-argocd-lab -n demo-prod get all
+make argocd-ui
+make guacamole-ui
 ```
 
-### Valider le repository avant commit
+### Valider le repository
 
 ```bash
 make validate
 ```
 
 ## Depannage
+
+### `make ingress-install` echoue
+
+Verifier:
+
+```bash
+kubectl config get-contexts kind-argocd-lab
+```
+
+Si le contexte est absent, recreer le cluster:
+
+```bash
+make cluster-up
+```
+
+### `argocd.local` ou `guacamole.local` ne repond pas
+
+Verifier:
+
+```bash
+make hosts-print
+kubectl --context kind-argocd-lab -n ingress-nginx get pods
+kubectl --context kind-argocd-lab -n guacamole get ingress
+```
+
+Controle attendu dans `/etc/hosts`:
+
+```text
+127.0.0.1 argocd.local
+127.0.0.1 guacamole.local
+```
 
 ### `make gitops-bootstrap` echoue
 
@@ -51,20 +96,20 @@ git fetch origin main
 git rev-list --left-right --count origin/main...HEAD
 ```
 
-### L'application de demo n'apparait pas
+### Guacamole ne demarre pas correctement
 
 Verifier:
 
 ```bash
-kubectl --context kind-argocd-lab -n argocd get application demo-app-prod -o yaml
-kubectl --context kind-argocd-lab -n argocd get application hello-app-prod -o yaml
-kubectl --context kind-argocd-lab -n demo-prod get all
+kubectl --context kind-argocd-lab -n guacamole get pods
+kubectl --context kind-argocd-lab -n guacamole describe pod -l app.kubernetes.io/name=guacamole
+kubectl --context kind-argocd-lab -n guacamole logs deployment/guacamole
+kubectl --context kind-argocd-lab -n guacamole logs deployment/guacamole-guacd
+kubectl --context kind-argocd-lab -n guacamole logs statefulset/guacamole-postgresql
 ```
 
-### Le port-forward est deja pris
+## Nettoyage complet
 
 ```bash
-kubectl --context kind-argocd-lab -n argocd port-forward svc/argocd-server 9090:443
-kubectl --context kind-argocd-lab -n demo-prod port-forward svc/demo-app 9093:80
-kubectl --context kind-argocd-lab -n demo-prod port-forward svc/hello-app 9193:80
+make destroy
 ```

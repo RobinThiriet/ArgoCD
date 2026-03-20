@@ -1,4 +1,4 @@
-# Argo CD GitOps Lab
+# Argo CD Guacamole Bastion
 
 [![Validate](https://img.shields.io/github/actions/workflow/status/RobinThiriet/ArgoCD/validate.yml?branch=main&label=validate)](https://github.com/RobinThiriet/ArgoCD/actions/workflows/validate.yml)
 [![Kubernetes](https://img.shields.io/badge/kubernetes-v1.29+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
@@ -7,41 +7,46 @@
 [![Docker](https://img.shields.io/badge/runtime-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![kind](https://img.shields.io/badge/kind-local%20cluster-6C47FF)](https://kind.sigs.k8s.io/)
 
-Base de travail pour decouvrir Argo CD, Kubernetes et le GitOps en local avec `kind`.
+Repository GitOps pour deployer un bastion Apache Guacamole sur Kubernetes avec Argo CD, `kind` et Docker.
 
-## Vision du projet
+Le repository est volontairement recentre sur une plateforme unique:
 
-Le depot fournit:
+- une seule application metier: `guacamole`;
+- un seul namespace applicatif: `guacamole`;
+- un acces local stable via Ingress;
+- une seule `Application` Argo CD;
+- un parcours GitOps simple a suivre pas a pas.
 
-- un cluster Kubernetes local cree avec `kind`;
-- une installation Argo CD dans le namespace `argocd`;
-- deux applications d'exemple (`demo-app` et `hello-app`);
-- un flux GitOps ou GitHub reste la source de verite;
-- un deploiement `prod` unique sur la branche `main`.
+## Vue d'ensemble
 
-## Objectifs
+La plateforme deploie:
 
-- comprendre le role d'Argo CD dans une chaine GitOps;
-- apprendre a deployer une application Kubernetes depuis un repository Git;
-- separer clairement les manifests applicatifs et les objets Argo CD;
-- disposer d'une base simple et propre pour evoluer ensuite.
+- `guacamole` pour l'interface web;
+- `guacd` pour le broker de sessions;
+- `postgresql` pour la persistance;
+- un `Ingress` local pour `guacamole.local`;
+- un acces local a Argo CD via `argocd.local`.
+
+GitHub reste la source de verite:
+
+1. tu modifies les manifests dans `apps/guacamole`;
+2. tu lances `make validate`;
+3. tu commit et tu push;
+4. Argo CD synchronise automatiquement le cluster.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    U[Utilisateur] --> G[Repository GitHub]
-    U --> M[Makefile et scripts]
-    M --> K[kind cluster]
-    K --> A[Namespace argocd]
-    A --> AC[Argo CD Applications]
-    AC --> P[Namespace demo-prod]
-    P --> D[demo-app]
-    P --> H[hello-app]
-    G -->|source of truth| AC
+    Dev[Developpeur] -->|git push| GitHub[GitHub]
+    Dev -->|make / kubectl| Kind[kind]
+    GitHub -->|repoURL| ArgoCD[Argo CD]
+    ArgoCD -->|sync| Guacamole[Guacamole]
+    Guacamole --> Guacd[guacd]
+    Guacamole --> PostgreSQL[PostgreSQL]
 ```
 
-Le detail architectural est disponible dans [docs/architecture.md](/root/ArgoCD/docs/architecture.md).
+Le detail est dans [docs/architecture.md](/root/ArgoCD/docs/architecture.md).
 
 ## Structure du repository
 
@@ -50,27 +55,21 @@ Le detail architectural est disponible dans [docs/architecture.md](/root/ArgoCD/
 |-- Makefile
 |-- README.md
 |-- Workflow
-|   `-- README.md
+|   |-- README.md
+|   `-- guacamole-bastion.md
 |-- apps
-|   |-- demo-app
-|   |   |-- base
-|   |   |-- kustomization.yaml
-|   |   `-- overlays
-|   |       `-- prod
-|   `-- hello-app
+|   `-- guacamole
 |       |-- base
-|       |-- kustomization.yaml
-|       `-- overlays
-|           `-- prod
+|       `-- kustomization.yaml
 |-- argocd
 |   |-- applications
-|   |   |-- demo-app-prod.yaml
-|   |   `-- hello-app-prod.yaml
+|   |   `-- guacamole.yaml
+|   |-- local-access
 |   `-- projects
-|       `-- demo-project.yaml
+|       `-- bastion-project.yaml
 |-- docs
-|-- scripts
-`-- CONTRIBUTING.md
+|-- kind
+`-- scripts
 ```
 
 ## Demarrage rapide
@@ -83,128 +82,141 @@ Le detail architectural est disponible dans [docs/architecture.md](/root/ArgoCD/
 - `git`
 - `make`
 
-### 1. Creer le cluster local
+### 1. Creer le cluster
 
 ```bash
 make cluster-up
 ```
 
-### 2. Installer Argo CD
+Cette etape cree un cluster `kind` avec les ports `80` et `443` exposes en local pour l'Ingress.
+
+### 2. Installer l'Ingress local
+
+```bash
+make ingress-install
+make hosts-print
+```
+
+Ajoute ensuite dans `/etc/hosts`:
+
+```text
+127.0.0.1 argocd.local
+127.0.0.1 guacamole.local
+```
+
+### 3. Installer Argo CD
 
 ```bash
 make argocd-install
-```
-
-### 3. Recuperer le mot de passe admin
-
-```bash
 make argocd-password
 ```
 
-### 4. Ouvrir l'UI Argo CD
+Acces Argo CD:
 
-```bash
-make argocd-ui
+```text
+http://argocd.local
 ```
 
-Acces: `https://localhost:8080`
-
-### 5. Commit et push
+### 4. Pousser la branche
 
 ```bash
 git add .
-git commit -m "chore: bootstrap argocd lab"
+git commit -m "chore: update guacamole bastion"
 git push origin main
 ```
 
-### 6. Declarer les applications GitOps
+Le bootstrap GitOps verifie que le depot local est propre et synchronise avec `origin/main`.
+
+### 5. Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
 ```
 
-Cette commande applique:
+Resultat attendu:
 
-- le `AppProject` `demo-project`;
-- `demo-app-prod`;
-- `hello-app-prod`.
+- `bastion-project` cree dans Argo CD;
+- `guacamole` cree dans Argo CD;
+- namespace `guacamole` cree automatiquement;
+- application `Synced` et `Healthy` apres reconciliation.
 
-### 7. Ouvrir les applications
+### 6. Ouvrir Guacamole
 
-```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
+Acces recommande:
+
+```text
+http://guacamole.local
 ```
 
-Acces:
+Acces de secours en port-forward:
 
-- `http://localhost:8083` pour `demo-app`;
-- `http://localhost:8183` pour `hello-app`.
+```bash
+make guacamole-ui
+```
+
+### 7. Connexion initiale
+
+Identifiants Guacamole par defaut:
+
+- utilisateur: `guacadmin`;
+- mot de passe: `guacadmin`.
+
+Action recommandee:
+
+- changer immediatement le mot de passe administrateur apres la premiere connexion.
 
 ## Workflow GitOps
 
-Le cycle cible est le suivant:
+Le workflow normal est:
 
-1. modifier les manifests Kubernetes dans le repository;
-2. commit local;
-3. `git push` vers GitHub;
-4. detection du changement par Argo CD;
-5. reconciliation automatique du cluster;
-6. verification dans l'interface Argo CD et via `kubectl`.
-
-Exemple:
-
-1. modifier [`apps/demo-app/overlays/prod/deployment-patch.yaml`](/root/ArgoCD/apps/demo-app/overlays/prod/deployment-patch.yaml#L1);
-2. changer le nombre de replicas;
+1. modifier `apps/guacamole`;
+2. lancer `make validate`;
 3. commit et push;
-4. observer la resynchronisation dans Argo CD.
+4. laisser Argo CD synchroniser;
+5. verifier dans `http://argocd.local`;
+6. tester sur `http://guacamole.local`.
 
-## Catalogue d'applications
+## Gestion des secrets
 
-| Application | Role | Image | Service |
-| --- | --- | --- | --- |
-| `demo-app` | Application de demonstration principale | `traefik/whoami:v1.10.1` | `svc/demo-app` |
-| `hello-app` | Seconde application d'exemple | `nginxdemos/hello:0.4` | `svc/hello-app` |
+Le `Secret` versionne dans Git contient des placeholders, par exemple:
 
-## Strategie d'environnement
+```text
+CHANGE_ME_GUACAMOLE_DB_PASSWORD
+```
 
-La branche `main` est maintenant alignee sur un seul environnement:
+Le but est:
 
-- `base/` contient les manifests communs;
-- `overlays/prod` contient la variation active;
-- `demo-prod` est le namespace cible;
-- les applications Argo CD actives sont `demo-app-prod` et `hello-app-prod`.
-
-Le detail est dans [docs/environment-strategy.md](/root/ArgoCD/docs/environment-strategy.md).
+- de garder le repository publiable;
+- de ne pas pousser de vrais mots de passe dans Git;
+- de conserver un lab GitOps fonctionnel.
 
 ## Commandes utiles
 
-| Commande | Description |
+| Commande | Role |
 | --- | --- |
-| `make help` | Affiche les commandes disponibles. |
 | `make cluster-up` | Cree le cluster `kind`. |
-| `make argocd-install` | Installe Argo CD dans le namespace `argocd`. |
-| `make argocd-password` | Affiche le mot de passe admin initial. |
-| `make argocd-ui` | Port-forward vers l'interface Argo CD. |
-| `make gitops-bootstrap` | Applique les applications Argo CD de `prod`. |
-| `make gitops-bootstrap-all` | Applique toutes les applications presentes dans `argocd/applications/`. |
-| `make demo-ui` | Ouvre `demo-app` en local. |
-| `make app-ui APP_NAME=hello-app` | Ouvre `hello-app` en local. |
-| `make status` | Affiche l'etat du cluster, d'Argo CD et des applications. |
-| `make validate` | Verifie les scripts shell et le rendu Kustomize. |
+| `make ingress-install` | Installe `ingress-nginx`. |
+| `make hosts-print` | Affiche les entrees `/etc/hosts` a ajouter. |
+| `make argocd-install` | Installe Argo CD et l'acces local Ingress. |
+| `make argocd-password` | Recupere le mot de passe admin initial. |
+| `make argocd-ui` | Ouvre un port-forward de secours vers Argo CD. |
+| `make gitops-bootstrap` | Cree l'application Guacamole dans Argo CD. |
+| `make guacamole-ui` | Ouvre Guacamole en port-forward. |
+| `make status` | Affiche l'etat du cluster. |
+| `make validate` | Valide les manifests et les scripts. |
 | `make destroy` | Supprime le cluster local. |
 
 ## Documentation detaillee
 
-- [Documentation index](/root/ArgoCD/docs/README.md)
-- [Architecture](/root/ArgoCD/docs/architecture.md)
-- [Getting started](/root/ArgoCD/docs/getting-started.md)
-- [Catalogue d'applications](/root/ArgoCD/docs/application-catalog.md)
-- [Strategie d'environnement](/root/ArgoCD/docs/environment-strategy.md)
-- [Workflow GitOps](/root/ArgoCD/docs/gitops-workflow.md)
-- [Workflow d'utilisation Argo CD](/root/ArgoCD/Workflow/README.md)
-- [Runbook d'exploitation](/root/ArgoCD/docs/runbook.md)
-- [Glossaire](/root/ArgoCD/docs/glossary.md)
-- [Repository standards](/root/ArgoCD/docs/repository-standards.md)
-- [Target structure](/root/ArgoCD/docs/target-structure.md)
-- [ADR](/root/ArgoCD/docs/adr/README.md)
+- [Workflow/README.md](/root/ArgoCD/Workflow/README.md)
+- [Workflow/guacamole-bastion.md](/root/ArgoCD/Workflow/guacamole-bastion.md)
+- [docs/getting-started.md](/root/ArgoCD/docs/getting-started.md)
+- [docs/architecture.md](/root/ArgoCD/docs/architecture.md)
+- [docs/gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md)
+- [docs/runbook.md](/root/ArgoCD/docs/runbook.md)
+
+## Prochaines evolutions
+
+- activer TLS;
+- integrer le SSO SAML;
+- remplacer les placeholders de secrets par une solution GitOps-compatible.

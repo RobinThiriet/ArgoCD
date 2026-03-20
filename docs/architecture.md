@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Le projet implemente un laboratoire GitOps local avec Argo CD, centre sur un deploiement `prod` unique sur la branche `main`.
+Le projet implemente un bastion Guacamole pilote en GitOps avec un seul environnement de travail.
 
 ## Vue logique
 
@@ -11,8 +11,7 @@ flowchart LR
     Dev[Developpeur] -->|git push| GitHub[Repository GitHub]
     Dev -->|make / kubectl| Cluster[kind cluster]
     GitHub -->|repoURL| ArgoCD[Argo CD]
-    ArgoCD -->|sync| Demo[demo-app]
-    ArgoCD -->|sync| Hello[hello-app]
+    ArgoCD -->|sync| Guacamole[Guacamole]
 ```
 
 ## Vue de deploiement
@@ -20,22 +19,49 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph Kubernetes["Cluster kind argocd-lab"]
-        subgraph NS1["Namespace argocd"]
+        subgraph Argo["Namespace argocd"]
             Server[argocd-server]
-            RepoServer[argocd-repo-server]
+            Repo[argocd-repo-server]
             Controller[argocd-application-controller]
         end
 
-        subgraph NS2["Namespace demo-prod"]
-            DemoDeployment[Deployment demo-app prod]
-            HelloDeployment[Deployment hello-app prod]
+        subgraph Bastion["Namespace guacamole"]
+            Ingress[Ingress guacamole.local]
+            Web[Deployment guacamole]
+            Guacd[Deployment guacd]
+            Db[StatefulSet postgresql]
+            Secret[Secret guacamole-secrets]
+            Pvc[PersistentVolumeClaim]
         end
     end
+
+    Repo --> Web
+    Repo --> Guacd
+    Repo --> Db
+    Ingress --> Web
+    Web --> Guacd
+    Web --> Db
+    Db --> Pvc
+    Web --> Secret
+    Db --> Secret
 ```
 
 ## Decoupage du repository
 
-- `apps/`: manifests applicatifs avec `base/` et `overlays/prod/`;
-- `argocd/`: `AppProject` et `Application`;
-- `scripts/`: automatisation locale;
-- `docs/`: documentation de reference.
+- `apps/guacamole/` contient les manifests Kubernetes
+- `argocd/` contient les objets Argo CD
+- `scripts/` automatise les operations locales
+- `docs/` contient la documentation projet
+
+## Choix structurants
+
+- `kind` pour un cluster local reproductible
+- Argo CD `v3.3.4`
+- PostgreSQL persistant
+- Ingress local stable sur `guacamole.local`
+
+## Limites actuelles
+
+- pas encore de TLS
+- pas encore de SAML
+- les secrets restent des placeholders de lab

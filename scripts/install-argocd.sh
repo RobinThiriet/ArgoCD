@@ -16,6 +16,11 @@ fi
 echo "Installation d'Argo CD ${ARGOCD_VERSION} dans le namespace ${ARGOCD_NAMESPACE}..."
 kubectl --context "${KUBE_CONTEXT}" create namespace "${ARGOCD_NAMESPACE}" --dry-run=client -o yaml | kubectl --context "${KUBE_CONTEXT}" apply -f -
 kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" --server-side --force-conflicts -f "${INSTALL_URL}"
+kubectl --context "${KUBE_CONTEXT}" apply -f argocd/local-access
+
+echo "Redemarrage d'argocd-server pour activer l'acces Ingress local..."
+kubectl --context "${KUBE_CONTEXT}" rollout restart deployment/argocd-server -n "${ARGOCD_NAMESPACE}"
+kubectl --context "${KUBE_CONTEXT}" rollout status deployment/argocd-server -n "${ARGOCD_NAMESPACE}" --timeout=300s
 
 echo "Attente de la disponibilite des pods Argo CD..."
 kubectl --context "${KUBE_CONTEXT}" wait --for=condition=Ready pod --all -n "${ARGOCD_NAMESPACE}" --timeout=300s

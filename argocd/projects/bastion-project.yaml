@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: demo-project
+  name: bastion-project
   namespace: argocd
 spec:
-  description: Projet GitOps de demo pour apprendre Argo CD sur l'environnement prod
+  description: Projet GitOps pour la plateforme bastion Guacamole
   sourceRepos:
     - https://github.com/RobinThiriet/ArgoCD.git
   destinations:
-    - namespace: demo-prod
+    - namespace: guacamole
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ""

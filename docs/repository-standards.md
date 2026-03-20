@@ -1,29 +1,13 @@
 # Repository Standards
 
-## Objectif
+## Principes
 
-Ce document fixe les standards de structure et de contribution du depot.
+- garder la racine du depot lisible
+- centraliser les manifests Guacamole dans `apps/guacamole`
+- separer les objets Argo CD dans `argocd/`
+- conserver la documentation longue dans `docs/`
 
-## Standards de structure
-
-Exemple:
-
-```text
-apps/
-  demo-app/
-    base/
-    overlays/
-      prod/
-```
-
-La regle generale est:
-
-- `base/` pour le commun;
-- `overlays/` pour les differences par environnement.
-
-## Standards de validation
-
-La commande minimale de validation locale est:
+## Validation minimale
 
 ```bash
 make validate

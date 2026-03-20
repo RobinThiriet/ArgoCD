@@ -2,11 +2,11 @@
 
 ## Objectif
 
-Ce guide permet de lancer le lab de bout en bout sur un poste local.
+Ce guide permet de lancer le bastion Guacamole de bout en bout sur un poste local, avec un ordre d'execution clair et des verifications a chaque etape.
 
 ## Prerequis
 
-- Docker fonctionnel
+- Docker
 - `kubectl`
 - `kind`
 - `git`
@@ -32,43 +32,58 @@ Resultat attendu:
 
 - un cluster `kind` nomme `argocd-lab`;
 - un contexte Kubernetes `kind-argocd-lab`;
-- un namespace cible `demo-prod`.
+- les ports `80` et `443` exposes localement pour l'Ingress.
 
-## Etape 2 - Installer Argo CD
+## Etape 2 - Installer l'Ingress
+
+```bash
+make ingress-install
+make hosts-print
+```
+
+Ajouter ensuite dans `/etc/hosts`:
+
+```text
+127.0.0.1 argocd.local
+127.0.0.1 guacamole.local
+```
+
+Verification utile:
+
+```bash
+kubectl --context kind-argocd-lab -n ingress-nginx get pods
+```
+
+## Etape 3 - Installer Argo CD
 
 ```bash
 make argocd-install
-```
-
-Verification:
-
-```bash
-make status
-```
-
-## Etape 3 - Recuperer le mot de passe admin
-
-```bash
 make argocd-password
 ```
 
-## Etape 4 - Ouvrir l'UI Argo CD
+Acces Argo CD:
 
-```bash
-make argocd-ui
+```text
+http://argocd.local
 ```
 
-Puis ouvrir `https://localhost:8080`.
+Verification utile:
 
-## Etape 5 - Pousser le contenu du repository
+```bash
+kubectl --context kind-argocd-lab -n argocd get pods
+```
+
+## Etape 4 - Pousser le repository
 
 ```bash
 git add .
-git commit -m "chore: bootstrap argocd lab"
+git commit -m "chore: update guacamole bastion"
 git push origin main
 ```
 
-## Etape 6 - Bootstrap GitOps
+Le bootstrap GitOps ne continue que si le depot local est propre et synchronise avec `origin/main`.
+
+## Etape 5 - Bootstrap GitOps
 
 ```bash
 make gitops-bootstrap
@@ -76,34 +91,56 @@ make gitops-bootstrap
 
 Resultat attendu:
 
-- `demo-project` cree dans Argo CD;
-- `demo-app-prod` cree dans Argo CD;
-- `hello-app-prod` cree dans Argo CD;
-- namespace `demo-prod` cree automatiquement lors de la sync.
+- `bastion-project` cree dans Argo CD;
+- `guacamole` cree dans Argo CD;
+- namespace `guacamole` cree automatiquement;
+- application `Synced` puis `Healthy`.
 
-## Etape 7 - Ouvrir les applications
+Verification utile:
 
 ```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
+kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
+kubectl --context kind-argocd-lab -n guacamole get all
 ```
 
-Acces:
+## Etape 6 - Ouvrir Guacamole
 
-- `http://localhost:8083`
-- `http://localhost:8183`
+Acces recommande:
+
+```text
+http://guacamole.local
+```
+
+Acces port-forward de secours:
+
+```bash
+make guacamole-ui
+```
+
+## Etape 7 - Connexion initiale
+
+Identifiants par defaut:
+
+- utilisateur: `guacadmin`;
+- mot de passe: `guacadmin`.
+
+Action recommandee:
+
+- changer immediatement le mot de passe administrateur.
 
 ## Etape 8 - Tester un changement GitOps
 
-Modifier [`apps/demo-app/overlays/prod/deployment-patch.yaml`](/root/ArgoCD/apps/demo-app/overlays/prod/deployment-patch.yaml#L1), puis:
+Modifier par exemple [`apps/guacamole/base/ingress.yaml`](/root/ArgoCD/apps/guacamole/base/ingress.yaml), puis:
 
 ```bash
-git add apps/demo-app/overlays/prod/deployment-patch.yaml
-git commit -m "feat: scale demo app"
+make validate
+git add .
+git commit -m "feat: update guacamole configuration"
 git push origin main
 ```
 
 Verification:
 
-- dans l'UI Argo CD, l'application doit repasser en `Synced`;
-- dans Kubernetes, le nombre de replicas doit evoluer.
+- dans Argo CD, l'application doit repasser en `Synced`;
+- dans Kubernetes, la ressource modifiee doit etre reconciliee;
+- l'acces `http://guacamole.local` doit rester fonctionnel.

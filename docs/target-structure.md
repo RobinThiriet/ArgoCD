@@ -1,34 +1,26 @@
 # Target Structure
 
-## Objectif
-
-Le depot courant est simplifie autour de `prod`. Ce document decrit une cible de croissance raisonnable si plusieurs environnements doivent revenir plus tard.
-
-## Structure actuelle
+## Structure cible
 
 ```text
 .
 |-- apps
-|   |-- demo-app
-|   |   |-- base
-|   |   `-- overlays
-|   |       `-- prod
-|   `-- hello-app
+|   `-- guacamole
 |       |-- base
-|       `-- overlays
-|           `-- prod
+|       `-- kustomization.yaml
 |-- argocd
-|   |-- projects
-|   |   `-- demo-project.yaml
-|   `-- applications
-|       |-- demo-app-prod.yaml
-|       `-- hello-app-prod.yaml
-`-- docs
+|   |-- applications
+|   |   `-- guacamole.yaml
+|   `-- projects
+|       `-- bastion-project.yaml
+|-- docs
+|-- Workflow
+`-- scripts
 ```
 
-## Chemin de migration recommande
+## Evolution recommandee
 
-1. conserver un fonctionnement simple sur `prod`;
-2. ajouter des applications si besoin;
-3. reintroduire d'autres environnements seulement si un vrai besoin apparait;
-4. envisager `ApplicationSet` si le nombre de cibles augmente.
+1. garder une seule plateforme tant que tu apprends
+2. ajouter TLS
+3. ajouter SAML
+4. introduire une vraie gestion des secrets

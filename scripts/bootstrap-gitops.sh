@@ -5,7 +5,6 @@ ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 CLUSTER_NAME="${CLUSTER_NAME:-argocd-lab}"
 KUBE_CONTEXT="kind-${CLUSTER_NAME}"
-APP_ENV="${APP_ENV:-prod}"
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "Ce dossier n'est pas un depot git."
@@ -27,24 +26,11 @@ if [[ "${behind}" != "0" || "${ahead}" != "0" ]]; then
   exit 1
 fi
 
-echo "Application du projet Argo CD..."
-kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/projects/demo-project.yaml
+echo "Application des projets Argo CD..."
+kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/projects
 
-case "${APP_ENV}" in
-  prod)
-    echo "Application GitOps de l'environnement prod..."
-    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications/*-prod.yaml
-    ;;
-  all)
-    echo "Application GitOps de toutes les applications prod..."
-    kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications
-    ;;
-  *)
-    echo "Valeur APP_ENV invalide: ${APP_ENV}"
-    echo "Valeurs supportees: prod, all"
-    exit 1
-    ;;
-esac
+echo "Application GitOps de Guacamole..."
+kubectl --context "${KUBE_CONTEXT}" apply -n "${ARGOCD_NAMESPACE}" -f argocd/applications
 
 echo "Bootstrap GitOps termine."
 kubectl --context "${KUBE_CONTEXT}" get applications.argoproj.io -n "${ARGOCD_NAMESPACE}"

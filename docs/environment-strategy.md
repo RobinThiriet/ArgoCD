@@ -1,49 +1,26 @@
 # Environment Strategy
 
-## Objectif
+## Strategie actuelle
 
-La branche `main` est volontairement simplifiee autour d'un seul environnement afin de garder un parcours GitOps plus lisible.
+Le projet ne separe plus `dev`, `staging` et `prod`.
 
-## Principe
+Il repose sur un seul environnement de travail, plus simple a maintenir et plus direct pour un usage de bastion local.
 
-Chaque application du repository est decoupee en:
+| Element | Valeur |
+| --- | --- |
+| Namespace applicatif | `guacamole` |
+| Application Argo CD | `guacamole` |
+| URL Guacamole | `http://guacamole.local` |
+| URL Argo CD | `http://argocd.local` |
+| Path Git | `apps/guacamole` |
 
-- une `base` commune;
-- un `overlay` actif pour `prod`.
+## Pourquoi ce choix
 
-Structure:
+- reduire la complexite operationnelle;
+- travailler directement sur une seule plateforme;
+- accelerer les iterations GitOps;
+- garder un parcours d'apprentissage lisible.
 
-```text
-apps/<application>/
-  base/
-  overlays/
-    prod/
-```
+## Evolution possible plus tard
 
-## Mapping actuel
-
-| Environnement | Overlay | Namespace | Application Argo CD |
-| --- | --- | --- | --- |
-| `prod` | `apps/<application>/overlays/prod` | `demo-prod` | `<application>-prod` |
-
-## Commandes utiles
-
-Bootstrap `prod`:
-
-```bash
-make gitops-bootstrap
-make gitops-bootstrap APP_ENV=prod
-```
-
-Bootstrap de toutes les applications declarees:
-
-```bash
-make gitops-bootstrap-all
-```
-
-Port-forward `prod`:
-
-```bash
-make demo-ui
-make app-ui APP_NAME=hello-app
-```
+Si plusieurs environnements deviennent necessaires, la structure `base/` pourra etre enrichie avec des overlays dedies.

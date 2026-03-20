@@ -2,26 +2,36 @@
 
 ## Definition
 
-Dans ce projet, GitOps signifie que Git definit l'etat desire du cluster. Argo CD compare cet etat desire avec l'etat reel de Kubernetes et applique les changements necessaires.
+GitOps signifie ici que Git definit l'etat desire du bastion Guacamole.
+
+Argo CD compare cet etat desire avec Kubernetes et applique les changements necessaires.
+
+## Cycle de vie du changement
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developpeur
+    participant Git as GitHub
+    participant Argo as Argo CD
+    participant K8s as Kubernetes
+
+    Dev->>Git: git push
+    Argo->>Git: lecture du repository
+    Argo->>K8s: application des manifests
+    K8s-->>Argo: etat courant
+    Argo-->>Dev: statut Synced / Healthy
+```
 
 ## Source de verite
 
-La source de verite est:
-
-- le repository GitHub;
-- la branche `main`;
-- le chemin cible, par exemple `apps/demo-app/overlays/prod`.
+- le repository GitHub
+- la branche `main`
+- le chemin `apps/guacamole`
 
 ## Exemple de changement
 
-1. modifier `apps/demo-app/overlays/prod/deployment-patch.yaml`;
-2. commit et push sur `main`;
-3. Argo CD detecte un diff;
-4. le `Deployment` est mis a jour.
-
-## Bonnes pratiques
-
-- faire des changements petits et lisibles;
-- centraliser le commun dans `base/` et les differences dans `overlays/`;
-- eviter les modifications manuelles dans le cluster;
-- utiliser des messages de commit explicites.
+1. modification de [`secret.yaml`](/root/ArgoCD/apps/guacamole/base/secret.yaml#L1)
+2. commit et push
+3. Argo CD detecte le diff
+4. le cluster est reconcilie
+5. tu verifies sur `guacamole.local`

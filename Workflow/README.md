@@ -2,70 +2,45 @@
 
 ## Objectif
 
-Ce document decrit le workflow normal d'utilisation d'Argo CD dans ce repository GitOps.
+Ce document decrit le workflow quotidien a suivre sur la branche principale du repository.
 
-## Principe general
-
-Avec Argo CD, on travaille d'abord dans Git:
+## Sequence normale
 
 1. identifier le changement a faire;
-2. modifier les manifests dans le repository;
-3. commit et push;
-4. laisser Argo CD detecter le changement;
-5. verifier la synchronisation et la sante de l'application.
+2. modifier les manifests dans `apps/guacamole`;
+3. lancer `make validate`;
+4. commit et push sur `main`;
+5. laisser Argo CD synchroniser;
+6. verifier l'etat `Synced` et `Healthy`;
+7. tester sur `http://guacamole.local`.
 
-## Choisir le bon endroit
+## Logique a adopter
 
-- changement commun: modifier `base/`
-- changement specifique a l'environnement actif: modifier `overlays/prod/`
-- changement de pilotage Argo CD: modifier `argocd/applications/` ou `argocd/projects/`
+Avec Argo CD, on n'agit pas d'abord dans le cluster.
 
-Exemples:
+On decrit d'abord dans Git l'etat cible, puis Argo CD applique cet etat.
 
-- augmenter les replicas en `prod` pour `demo-app`: modifier `apps/demo-app/overlays/prod/`
-- changer l'image de `hello-app` partout: modifier `apps/hello-app/base/`
-- ajouter une nouvelle application: creer `apps/<app>/` et son manifeste Argo CD
+Git est la source de verite.
 
-## Validation locale
+## Endroits utiles dans le repository
 
-```bash
-make validate
-```
+- `apps/guacamole/base/` pour les manifests applicatifs;
+- `apps/guacamole/kustomization.yaml` pour le point d'entree deploye;
+- `argocd/applications/guacamole.yaml` pour l'application Argo CD;
+- `argocd/projects/bastion-project.yaml` pour le perimetre autorise.
 
-## Tester l'application
-
-Pour `demo-app`:
-
-```bash
-make demo-ui
-```
-
-Pour `hello-app`:
-
-```bash
-make app-ui APP_NAME=hello-app
-```
-
-## Cas d'usage typique
-
-Exemple de changement de replicas:
-
-```text
-apps/demo-app/overlays/prod/deployment-patch.yaml
-```
-
-Puis:
+## Commandes quotidiennes
 
 ```bash
 make validate
 git add .
-git commit -m "feat: scale demo app in prod"
+git commit -m "feat: describe the change"
 git push origin main
+make status
 ```
 
-## Ce qu'il faut eviter
+## Resume
 
-- modifier manuellement les ressources dans Kubernetes sans le refleter dans Git;
-- faire de gros changements non relus;
-- melanger plusieurs sujets dans un meme commit;
-- oublier de verifier l'etat `Synced` et `Healthy`.
+```text
+Je change Git, je pousse, Argo CD synchronise, je verifie sur guacamole.local.
+```

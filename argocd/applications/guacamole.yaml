@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: demo-app-prod
+  name: guacamole
   namespace: argocd
 spec:
-  project: demo-project
+  project: bastion-project
   source:
     repoURL: https://github.com/RobinThiriet/ArgoCD.git
     targetRevision: main
-    path: apps/demo-app/overlays/prod
+    path: apps/guacamole
   destination:
     server: https://kubernetes.default.svc
-    namespace: demo-prod
+    namespace: guacamole
   syncPolicy:
     automated:
       prune: true
