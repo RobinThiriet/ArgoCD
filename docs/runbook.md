@@ -108,6 +108,22 @@ kubectl --context kind-argocd-lab -n guacamole logs deployment/guacamole-guacd
 kubectl --context kind-argocd-lab -n guacamole logs statefulset/guacamole-postgresql
 ```
 
+### L'authentification SAML ne fonctionne pas
+
+Verifier:
+
+```bash
+kubectl --context kind-argocd-lab -n guacamole get configmap guacamole-saml-config -o yaml
+kubectl --context kind-argocd-lab -n guacamole logs deployment/guacamole
+```
+
+Points de controle:
+
+- `SAML_ENABLED` doit etre a `true`
+- `SAML_IDP_METADATA_URL` doit etre accessible
+- `SAML_CALLBACK_URL` doit correspondre a l'URL exposee par Guacamole
+- `SAML_STRICT` doit rester a `true` hors tests
+
 ## Nettoyage complet
 
 ```bash

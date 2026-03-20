@@ -213,6 +213,7 @@ Le but est:
 - [docs/getting-started.md](/root/ArgoCD/docs/getting-started.md)
 - [docs/architecture.md](/root/ArgoCD/docs/architecture.md)
 - [docs/gitops-workflow.md](/root/ArgoCD/docs/gitops-workflow.md)
+- [docs/saml-auth.md](/root/ArgoCD/docs/saml-auth.md)
 - [docs/runbook.md](/root/ArgoCD/docs/runbook.md)
 
 ## Prochaines evolutions

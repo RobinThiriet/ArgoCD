@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-saml-config
+data:
+  POSTGRESQL_ENABLED: "true"
+  SAML_ENABLED: "false"
+  SAML_IDP_METADATA_URL: https://idp.example.com/metadata
+  SAML_ENTITY_ID: https://guacamole.local
+  SAML_CALLBACK_URL: https://guacamole.local
+  SAML_STRICT: "true"
+  SAML_DEBUG: "false"
+  SAML_COMPRESS_REQUEST: "true"
+  SAML_COMPRESS_RESPONSE: "true"
+  SAML_GROUP_ATTRIBUTE: groups
+  EXTENSION_PRIORITY: "*, saml"

@@ -26,6 +26,11 @@ spec:
           env:
             - name: WEBAPP_CONTEXT
               value: ROOT
+            - name: POSTGRESQL_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: POSTGRESQL_ENABLED
             - name: GUACD_HOSTNAME
               value: guacamole-guacd
             - name: GUACD_PORT
@@ -49,6 +54,56 @@ spec:
                 secretKeyRef:
                   name: guacamole-secrets
                   key: POSTGRES_PASSWORD
+            - name: SAML_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_ENABLED
+            - name: SAML_IDP_METADATA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_IDP_METADATA_URL
+            - name: SAML_ENTITY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_ENTITY_ID
+            - name: SAML_CALLBACK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_CALLBACK_URL
+            - name: SAML_STRICT
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_STRICT
+            - name: SAML_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_DEBUG
+            - name: SAML_COMPRESS_REQUEST
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_COMPRESS_REQUEST
+            - name: SAML_COMPRESS_RESPONSE
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_COMPRESS_RESPONSE
+            - name: SAML_GROUP_ATTRIBUTE
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: SAML_GROUP_ATTRIBUTE
+            - name: EXTENSION_PRIORITY
+              valueFrom:
+                configMapKeyRef:
+                  name: guacamole-saml-config
+                  key: EXTENSION_PRIORITY
           readinessProbe:
             httpGet:
               path: /
