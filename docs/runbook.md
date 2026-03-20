@@ -14,7 +14,7 @@ make status
 kubectl --context kind-argocd-lab -n argocd get pods
 ```
 
-### Recuperer l'application Argo CD
+### Recuperer les applications Argo CD
 
 ```bash
 kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
@@ -25,14 +25,11 @@ kubectl --context kind-argocd-lab -n argocd get applications.argoproj.io
 ```bash
 make demo-ui
 make app-ui APP_NAME=hello-app
-make app-ui APP_NAME=hello-app APP_ENV=staging
 ```
 
-### Recuperer les ressources de la demo
+### Recuperer les ressources applicatives
 
 ```bash
-kubectl --context kind-argocd-lab -n demo get all
-kubectl --context kind-argocd-lab -n demo-staging get all
 kubectl --context kind-argocd-lab -n demo-prod get all
 ```
 
@@ -44,34 +41,7 @@ make validate
 
 ## Depannage
 
-### Le cluster n'existe pas
-
-Symptome:
-
-- les commandes `kubectl --context kind-argocd-lab ...` echouent.
-
-Action:
-
-```bash
-make cluster-up
-```
-
-### Argo CD ne demarre pas
-
-Verifier:
-
-```bash
-kubectl --context kind-argocd-lab -n argocd get pods
-kubectl --context kind-argocd-lab -n argocd describe pod <pod-name>
-kubectl --context kind-argocd-lab -n argocd logs <pod-name>
-```
-
 ### `make gitops-bootstrap` echoue
-
-Ca signifie en general:
-
-- qu'il reste des modifications locales non committees;
-- que le depot local n'est pas synchronise avec `origin/main`.
 
 Verifier:
 
@@ -86,29 +56,15 @@ git rev-list --left-right --count origin/main...HEAD
 Verifier:
 
 ```bash
-kubectl --context kind-argocd-lab -n argocd get application demo-app-dev -o yaml
-kubectl --context kind-argocd-lab -n argocd get application hello-app-dev -o yaml
-kubectl --context kind-argocd-lab -n demo get all
+kubectl --context kind-argocd-lab -n argocd get application demo-app-prod -o yaml
+kubectl --context kind-argocd-lab -n argocd get application hello-app-prod -o yaml
+kubectl --context kind-argocd-lab -n demo-prod get all
 ```
 
 ### Le port-forward est deja pris
 
-Changer temporairement de port:
-
 ```bash
 kubectl --context kind-argocd-lab -n argocd port-forward svc/argocd-server 9090:443
-kubectl --context kind-argocd-lab -n demo port-forward svc/demo-app 9091:80
-kubectl --context kind-argocd-lab -n demo port-forward svc/hello-app 9191:80
-kubectl --context kind-argocd-lab -n demo-staging port-forward svc/demo-app 9092:80
-kubectl --context kind-argocd-lab -n demo-staging port-forward svc/hello-app 9192:80
 kubectl --context kind-argocd-lab -n demo-prod port-forward svc/demo-app 9093:80
 kubectl --context kind-argocd-lab -n demo-prod port-forward svc/hello-app 9193:80
 ```
-
-## Nettoyage complet
-
-```bash
-make destroy
-```
-
-Cette commande supprime le cluster local `argocd-lab`.

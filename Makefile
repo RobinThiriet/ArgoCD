@@ -2,7 +2,7 @@ CLUSTER_NAME ?= argocd-lab
 ARGOCD_NAMESPACE ?= argocd
 ARGOCD_VERSION ?= v3.3.4
 REPO_BRANCH ?= main
-APP_ENV ?= dev
+APP_ENV ?= prod
 APP_NAME ?= demo-app
 
 .PHONY: help cluster-up argocd-install argocd-password argocd-ui gitops-bootstrap gitops-bootstrap-all demo-ui app-ui status validate destroy
@@ -14,9 +14,9 @@ help:
 		'  make argocd-install    Installe Argo CD dans le cluster' \
 		'  make argocd-password   Affiche le mot de passe admin initial' \
 		'  make argocd-ui         Ouvre un port-forward vers Argo CD (bloquant)' \
-		'  make gitops-bootstrap  Bootstrap toutes les apps d un environnement (defaut: dev)' \
-		'  make gitops-bootstrap-all Bootstrap dev, staging et prod' \
-		'  make demo-ui           Alias de compatibilite vers demo-app (defaut: dev)' \
+		'  make gitops-bootstrap  Bootstrap toutes les apps d un environnement (defaut: prod)' \
+		'  make gitops-bootstrap-all Bootstrap toutes les apps prod' \
+		'  make demo-ui           Alias de compatibilite vers demo-app (defaut: prod)' \
 		'  make app-ui            Ouvre une app locale avec APP_NAME et APP_ENV' \
 		'  make status            Affiche l etat general du cluster' \
 		'  make validate          Verifie scripts et manifests locaux' \
@@ -53,7 +53,7 @@ status:
 	@printf '\n'
 	@kubectl --context kind-$(CLUSTER_NAME) get applications.argoproj.io -n $(ARGOCD_NAMESPACE) 2>/dev/null || true
 	@printf '\n'
-	@for ns in demo demo-staging demo-prod; do \
+	@for ns in demo-prod; do \
 		printf '%s\n' "$$ns:"; \
 		kubectl --context kind-$(CLUSTER_NAME) get all -n $$ns 2>/dev/null || true; \
 		printf '\n'; \
@@ -64,7 +64,7 @@ validate:
 	@for app in $$(find apps -mindepth 1 -maxdepth 1 -type d | sort); do \
 		kubectl kustomize $$app >/dev/null; \
 		kubectl kustomize $$app/base >/dev/null; \
-		for overlay in $$app/overlays/*; do \
+		for overlay in $$(find $$app/overlays -mindepth 1 -maxdepth 1 -type d | sort); do \
 			kubectl kustomize $$overlay >/dev/null; \
 		done; \
 	done

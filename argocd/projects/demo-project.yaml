@@ -4,14 +4,10 @@ metadata:
   name: demo-project
   namespace: argocd
 spec:
-  description: Projet GitOps de demo pour apprendre Argo CD sur plusieurs environnements
+  description: Projet GitOps de demo pour apprendre Argo CD sur l'environnement prod
   sourceRepos:
     - https://github.com/RobinThiriet/ArgoCD.git
   destinations:
-    - namespace: demo
-      server: https://kubernetes.default.svc
-    - namespace: demo-staging
-      server: https://kubernetes.default.svc
     - namespace: demo-prod
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:

@@ -3,22 +3,16 @@ set -euo pipefail
 
 CLUSTER_NAME="${CLUSTER_NAME:-argocd-lab}"
 KUBE_CONTEXT="kind-${CLUSTER_NAME}"
-APP_ENV="${APP_ENV:-dev}"
+APP_ENV="${APP_ENV:-prod}"
 APP_NAME="${APP_NAME:-demo-app}"
 
 case "${APP_ENV}" in
-  dev)
-    NAMESPACE="demo"
-    ;;
-  staging)
-    NAMESPACE="demo-staging"
-    ;;
   prod)
     NAMESPACE="demo-prod"
     ;;
   *)
     echo "Valeur APP_ENV invalide: ${APP_ENV}"
-    echo "Valeurs supportees: dev, staging, prod"
+    echo "Valeurs supportees: prod"
     exit 1
     ;;
 esac
@@ -26,15 +20,11 @@ esac
 case "${APP_NAME}" in
   demo-app)
     case "${APP_ENV}" in
-      dev) LOCAL_PORT="${LOCAL_PORT:-8081}" ;;
-      staging) LOCAL_PORT="${LOCAL_PORT:-8082}" ;;
       prod) LOCAL_PORT="${LOCAL_PORT:-8083}" ;;
     esac
     ;;
   hello-app)
     case "${APP_ENV}" in
-      dev) LOCAL_PORT="${LOCAL_PORT:-8181}" ;;
-      staging) LOCAL_PORT="${LOCAL_PORT:-8182}" ;;
       prod) LOCAL_PORT="${LOCAL_PORT:-8183}" ;;
     esac
     ;;
